@@ -2,12 +2,7 @@
 #include "LED_Driver.h"
 
 LED_Driver::LED_Driver(): pio(pio0), sm(0), offset(0)
-{
-    for(int i = 0; i < NUM_LEDS; i++)
-    {
-        leds[i] = 0;
-    }
-}
+{}
 
 void LED_Driver::init()
 {
@@ -15,21 +10,32 @@ void LED_Driver::init()
     ws2812_program_init(pio, sm, offset, LED_CTRL_PIN, LED_CTRL_FREQ, false);
 }
 
-void LED_Driver::put_pixel(uint32_t pixel_grb) 
+void LED_Driver::put_pixel(RGB_Color& pixel) 
 {
-    pio_sm_put_blocking(pio, sm, pixel_grb << 8u);
+    pio_sm_put_blocking(pio, sm, pixel.RGB_To_WS2812());
 }
 
-uint32_t LED_Driver::urgb_u32(uint8_t r, uint8_t g, uint8_t b) 
-{
-    return ((uint32_t)(r) << 8) | ((uint32_t)(g) << 16) | (uint32_t)(b);
-}
-
-void LED_Driver::set_led_color(int index, uint8_t r, uint8_t g, uint8_t b) 
+void LED_Driver::set_led_color(int index, RGB_Color& color) 
 {
     if (index < NUM_LEDS)
     {
-        leds[index] = urgb_u32(r, g, b);
+        leds[index] = color;
+    }
+}
+
+void LED_Driver::set_led_in_field(int field_index, int local_led_index, RGB_Color& color) 
+{
+    if (field_index >= 0 && field_index < NUM_FIELDS && local_led_index >= 0 && local_led_index < NUM_LEDS_PER_FIELD)
+    {
+        int absolute_index = (field_index * NUM_LEDS_PER_FIELD) + local_led_index;
+        set_led_color(absolute_index, color);
+    }
+}
+
+void LED_Driver::set_field(int field_index, RGB_Color& color)
+{
+    for(int i = 0; i < NUM_LEDS_PER_FIELD; i++){
+        set_led_in_field(field_index, i, color);
     }
 }
 
@@ -45,7 +51,7 @@ void LED_Driver::show()
 
 void LED_Driver::clear() {
     for(int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = 0;
+        leds[i] = RGB_Color(0,0,0);
     }
     show();
 }

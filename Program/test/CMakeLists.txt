@@ -41,6 +41,7 @@ add_executable(test
     ${CMAKE_CURRENT_SOURCE_DIR}/src/test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/LED_Driver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TCA9555_Driver.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/RGB_Color.cpp
     )
 
 pico_set_program_name(test "test")
