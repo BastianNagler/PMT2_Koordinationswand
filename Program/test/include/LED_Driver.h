@@ -1,26 +1,27 @@
 #ifndef _LED_DRIVER_H
 #define _LED_DRIVER_H
 
+#include <vector>
 #include "hardware/pio.h"
 #include "ws2812.pio.h"
 #include "RGB_Color.h"
 
-#define NUM_FIELDS 64
-#define NUM_LEDS_PER_FIELD 10
-#define NUM_LEDS (NUM_FIELDS * NUM_LEDS_PER_FIELD)
-#define LED_CTRL_PIN 15
-#define LED_CTRL_FREQ 800000
-
 class LED_Driver
 {
     private: 
-        RGB_Color leds[NUM_LEDS];
+        uint8_t num_fields;
+        uint8_t num_leds_per_field;
+        uint8_t num_leds = num_fields * num_leds_per_field;
+        uint8_t led_ctrl_pin;
+        uint8_t led_ctrl_freq;
+
+        std::vector<RGB_Color> leds;
         const uint8_t sm;
         const PIO pio;
         uint offset;
 
     public:
-        LED_Driver();
+        LED_Driver(uint8_t num_fields, uint8_t num_leds_per_field, uint8_t led_ctrl_pin, uint8_t led_ctrl_freq);
 
         void init();
 
