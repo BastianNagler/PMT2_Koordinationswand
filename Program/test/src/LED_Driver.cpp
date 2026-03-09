@@ -11,7 +11,7 @@ void LED_Driver::init()
     leds.resize(num_leds, RGB_Color(0,0,0));
     
     offset = pio_add_program(pio, &ws2812_program);
-    ws2812_program_init(pio, sm, offset, led_ctrl_pin, led_ctrl_pin, false);
+    ws2812_program_init(pio, sm, offset, led_ctrl_pin, led_ctrl_freq, false);
 }
 
 void LED_Driver::put_pixel(RGB_Color& pixel) 
