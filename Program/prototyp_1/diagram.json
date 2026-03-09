@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-pi-pico",
+      "id": "pico",
+      "top": 43.15,
+      "left": 3.8,
+      "rotate": 180,
+      "attrs": { "builder": "pico-sdk" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 92.6,
+      "left": 115.2,
+      "attrs": { "color": "green", "xray": "1", "bounce": "0" }
+    },
+    {
+      "type": "wokwi-led-strip",
+      "id": "strip1",
+      "top": 30.9,
+      "left": 153.6,
+      "attrs": { "pixels": "8" }
+    }
+  ],
+  "connections": [
+    [ "pico:GP0", "$serialMonitor:RX", "", [] ],
+    [ "pico:GP1", "$serialMonitor:TX", "", [] ],
+    [ "pico:GP10", "btn1:1.l", "green", [ "h0" ] ],
+    [ "btn1:2.l", "pico:3V3", "red", [ "h-9.6", "v144.2", "h-134.4", "v-76.8" ] ],
+    [ "pico:GP15", "strip1:DIN", "green", [ "h0" ] ],
+    [ "strip1:VDD", "pico:3V3", "red", [ "h-182.4", "v153.6" ] ],
+    [ "strip1:VSS", "pico:GND.4", "black", [ "h-19.2", "v8.8" ] ]
+  ],
+  "dependencies": {}
+}
