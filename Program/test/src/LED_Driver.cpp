@@ -1,15 +1,15 @@
 #include "pico/stdlib.h"
 #include "LED_Driver.h"
 
-LED_Driver::LED_Driver(uint8_t num_fields, uint8_t num_leds_per_field, uint8_t led_ctrl_pin, uint8_t led_ctrl_freq)
+LED_Driver::LED_Driver(uint8_t num_fields, uint8_t num_leds_per_field, uint8_t led_ctrl_pin, uint32_t led_ctrl_freq)
     : num_fields(num_fields), num_leds_per_field(num_leds_per_field), num_leds(num_fields * num_leds_per_field), led_ctrl_pin(led_ctrl_pin), led_ctrl_freq(led_ctrl_freq),
       pio(pio0), sm(0), offset(0)
-{
-    leds.resize(num_leds, RGB_Color(0,0,0));
-}
+{}
 
 void LED_Driver::init()
 {
+    leds.resize(num_leds, RGB_Color(0,0,0));
+    
     offset = pio_add_program(pio, &ws2812_program);
     ws2812_program_init(pio, sm, offset, led_ctrl_pin, led_ctrl_pin, false);
 }

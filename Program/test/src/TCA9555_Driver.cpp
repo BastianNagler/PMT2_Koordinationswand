@@ -11,24 +11,12 @@ TCA9555_Driver::TCA9555_Driver(i2c_inst_t* i2c_port, uint8_t num_tca9555, uint8_
 {
     instance = this;
 
-    tca9555_addresses = new uint8_t[num_tca9555];
-    tca9555_irq_gpio_pins = new uint8_t[num_tca9555];
-    tca9555_needs_read = new bool[num_tca9555];
-
-    for(int i = 0; i < num_tca9555; i++) {
+    for(int i = 0; i < num_tca9555 && i < 8; i++) {
         tca9555_addresses[i] = addresses[i];
         tca9555_irq_gpio_pins[i] = irq_pins[i];
         tca9555_needs_read[i] = false;
     }
 }
-
-TCA9555_Driver::~TCA9555_Driver()
-{
-    delete[] tca9555_addresses;
-    delete[] tca9555_irq_gpio_pins;
-    delete[] tca9555_needs_read;
-}
-
 
 void TCA9555_Driver::init()
 {
@@ -55,6 +43,8 @@ void TCA9555_Driver::init()
 
 void TCA9555_Driver::tca9555_irq_callback(uint gpio, uint32_t events)
 {
+    gpio_acknowledge_irq(gpio, events);
+
     if(instance == nullptr) return;
 
     for(int i = 0; i < instance->num_tca9555; i++ )

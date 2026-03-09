@@ -16,20 +16,19 @@ class TCA9555_Driver
 
 
         // TCA9555 I²C Addresses are [0 1 0 0 A2 A1 A0]
-        uint8_t* tca9555_addresses;
+        uint8_t tca9555_addresses[8];
 
-        uint8_t* tca9555_irq_gpio_pins;
+        uint8_t tca9555_irq_gpio_pins[8];
 
         static TCA9555_Driver* instance;
 
     public:
         
-        volatile bool* tca9555_needs_read;
+        volatile bool tca9555_needs_read[8];
 
 
 
         TCA9555_Driver(i2c_inst_t* i2c_port, uint8_t num_tca9555, uint8_t i2c_scl_pin, uint8_t i2c_sda_pin, const uint8_t* addresses, const uint8_t* irq_pins);
-        ~TCA9555_Driver();
 
         void init();
 

@@ -11,9 +11,9 @@ class LED_Driver
     private: 
         uint8_t num_fields;
         uint8_t num_leds_per_field;
-        uint8_t num_leds = num_fields * num_leds_per_field;
+        uint16_t num_leds;
         uint8_t led_ctrl_pin;
-        uint8_t led_ctrl_freq;
+        uint32_t led_ctrl_freq;
 
         std::vector<RGB_Color> leds;
         const uint8_t sm;
@@ -21,7 +21,7 @@ class LED_Driver
         uint offset;
 
     public:
-        LED_Driver(uint8_t num_fields, uint8_t num_leds_per_field, uint8_t led_ctrl_pin, uint8_t led_ctrl_freq);
+        LED_Driver(uint8_t num_fields, uint8_t num_leds_per_field, uint8_t led_ctrl_pin, uint32_t led_ctrl_freq);
 
         void init();
 
