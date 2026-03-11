@@ -1,7 +1,6 @@
 #ifndef _LED_DRIVER_H
 #define _LED_DRIVER_H
 
-#include <vector>
 #include "hardware/pio.h"
 #include "ws2812.pio.h"
 #include "RGB_Color.h"
@@ -15,13 +14,14 @@ class LED_Driver
         uint8_t led_ctrl_pin;
         uint32_t led_ctrl_freq;
 
-        std::vector<RGB_Color> leds;
+        RGB_Color* leds;
         const uint8_t sm;
         const PIO pio;
         uint offset;
 
     public:
         LED_Driver(uint8_t num_fields, uint8_t num_leds_per_field, uint8_t led_ctrl_pin, uint32_t led_ctrl_freq);
+        ~LED_Driver();
 
         void init();
 
