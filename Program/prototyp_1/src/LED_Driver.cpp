@@ -36,7 +36,7 @@ void LED_Driver::set_led_color(int index, RGB_Color& color)
 
 void LED_Driver::set_led_in_field(int field_index, int local_led_index, RGB_Color& color) 
 {
-    if (field_index >= 0 && field_index < num_leds && local_led_index >= 0 && local_led_index < num_leds_per_field)
+    if (field_index >= 0 && field_index < num_fields && local_led_index >= 0 && local_led_index < num_leds_per_field)
     {
         int absolute_index = (field_index * num_leds_per_field) + local_led_index;
         set_led_color(absolute_index, color);
