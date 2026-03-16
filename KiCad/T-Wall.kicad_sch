@@ -9024,7 +9024,7 @@
 				)
 			)
 		)
-		(property "Footprint" "SN74AHCT125N:DIP794W45P254L1930H508Q14"
+		(property "Footprint" "footprints:SN74HCT125N"
 			(at 274.32 166.37 0)
 			(effects
 				(font
@@ -9135,7 +9135,7 @@
 			(uuid "f5ecf93a-5187-4e50-9318-81441866814b")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "U6")
 					(unit 1)
@@ -10647,7 +10647,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "2086-1208_700-000_997-607:2086-1208_700-000_997-607"
+		(property "Footprint" "footprints:2086-1208_700-000_997-607"
 			(at 271.78 68.58 0)
 			(effects
 				(font
@@ -10725,7 +10725,7 @@
 			(uuid "82a0a976-effc-4bc5-b4f2-f8267b7b8780")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "J9")
 					(unit 1)
@@ -11035,7 +11035,7 @@
 			(uuid "316be140-5703-4f04-ac54-feb20274d110")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR09")
 					(unit 1)
@@ -11101,7 +11101,7 @@
 			(uuid "e06d1e11-5e71-4800-88c6-4aa249da10ab")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR06")
 					(unit 1)
@@ -11457,7 +11457,7 @@
 			(uuid "2ea93ac9-265c-43a3-adb1-80928adcb226")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR058")
 					(unit 1)
@@ -11804,7 +11804,7 @@
 			(uuid "66f4fa6b-0f40-4874-9cbd-e610788fa809")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR038")
 					(unit 1)
@@ -11950,7 +11950,7 @@
 			(uuid "89a6da45-da0c-4bc7-91f0-04aab4a4991c")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR048")
 					(unit 1)
@@ -12155,7 +12155,7 @@
 			(uuid "ddffe661-7632-49ee-85d2-e72adac20038")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR060")
 					(unit 1)
@@ -12490,7 +12490,7 @@
 			(uuid "35022b82-08bd-4db4-b643-5be3660ad706")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR02")
 					(unit 1)
@@ -12557,7 +12557,7 @@
 			(uuid "8734bb5c-1210-4206-9192-19888b26696d")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR042")
 					(unit 1)
@@ -12901,7 +12901,7 @@
 			(uuid "954fdc4a-6033-414c-823a-bb4e0407b013")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR04")
 					(unit 1)
@@ -13034,7 +13034,7 @@
 			(uuid "3167f7a7-0aed-4db5-918e-f99684cd5fac")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR010")
 					(unit 1)
@@ -13369,7 +13369,7 @@
 			(uuid "aca38dc4-1e9b-46b3-bed4-f4481b20776c")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR040")
 					(unit 1)
@@ -14021,7 +14021,7 @@
 			(uuid "efd0cb0e-3931-4b4a-8a4e-f80b01a4560d")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "JP2")
 					(unit 1)
@@ -14116,7 +14116,7 @@
 			(uuid "93663efb-ab1b-4864-8c42-7c74683c8e3a")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "U7")
 					(unit 1)
@@ -14183,7 +14183,7 @@
 			(uuid "9964b077-d933-4457-92c4-cb674f5690d0")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR03")
 					(unit 1)
@@ -14328,7 +14328,7 @@
 			(uuid "af7f6de3-fabc-4a86-ad9d-0bf14795f978")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "C5")
 					(unit 1)
@@ -14395,7 +14395,7 @@
 			(uuid "13828a94-4981-4a1e-95a1-c8369bbf9fe4")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR059")
 					(unit 1)
@@ -14773,7 +14773,7 @@
 			(uuid "e5387f04-5e65-4e88-9ce0-be720ca94176")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "J2")
 					(unit 1)
@@ -14840,7 +14840,7 @@
 			(uuid "fe4d32db-c856-4f6c-a59c-fcdcc2a1c17d")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR044")
 					(unit 1)
@@ -14907,7 +14907,7 @@
 			(uuid "f257ea7a-b4c0-4db1-a61c-bb3264e6f88b")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR052")
 					(unit 1)
@@ -14974,7 +14974,7 @@
 			(uuid "5f95a07a-e372-4132-9957-1e562be7d5f8")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR050")
 					(unit 1)
@@ -15108,7 +15108,7 @@
 			(uuid "b445dbd9-563c-465e-be7c-498b2b9980db")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR046")
 					(unit 1)
@@ -15499,7 +15499,7 @@
 			(uuid "ad83541e-f280-4223-8ae6-af8f8410abc6")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "C1")
 					(unit 1)
@@ -15535,7 +15535,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "PCM_Espressif:ESP32-S3-DevKitC"
+		(property "Footprint" "footprints:ESP32-S3-DevKitC"
 			(at 222.25 24.13 0)
 			(effects
 				(font
@@ -15695,7 +15695,7 @@
 			(uuid "9f8f2873-5c56-40f2-964b-5096e2e806c6")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "U5")
 					(unit 1)
@@ -16295,7 +16295,7 @@
 			(uuid "06bf2916-1a46-4bed-be27-b8aeea747a74")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "R8")
 					(unit 1)
@@ -16440,7 +16440,7 @@
 			(uuid "9f0934a0-091d-49fb-bb65-30353d8c27e7")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "U1")
 					(unit 1)
@@ -16679,7 +16679,7 @@
 			(uuid "a94c5b5a-020b-4f47-bd74-188e71f8e77f")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "JP1")
 					(unit 1)
@@ -16821,7 +16821,7 @@
 			(uuid "062f7ec7-7a6e-4c6e-b789-bb90af6fad04")
 		)
 		(instances
-			(project ""
+			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR01")
 					(unit 1)
