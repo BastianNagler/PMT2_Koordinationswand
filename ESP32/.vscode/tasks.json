@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0", 
+    "tasks": [
+        {
+            "label": "Prepare Debug",
+            "type": "shell",
+            "command": "${env:HOMEDRIVE}${env:HOMEPATH}/.platformio/packages/tool-openocd-esp32/bin/openocd",
+            "args": [
+                "-f", 
+                "${env:HOMEDRIVE}${env:HOMEPATH}/.platformio/packages/tool-openocd-esp32/share/openocd/scripts/board/esp32s3-builtin.cfg",
+                "-c",
+                "\"init; reset halt; exit\""],
+            "problemMatcher": [], 
+            "dependsOn": [
+            ],
+            "dependsOrder": "sequence"
+        }
+    ]
+}
