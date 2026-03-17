@@ -37,9 +37,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.8,
-          "height": 1.27,
-          "width": 2.54
+          "drill": 0.0,
+          "height": 2.05,
+          "width": 2.05
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -101,6 +101,14 @@
         ],
         [
           "silk_edge_clearance|138583320|49876880|31c43b89-d466-4b4e-9d66-a3db1f9fb0a8|1df3a264-2f80-4e9d-b4ab-f3f999df101b",
+          ""
+        ],
+        [
+          "silk_overlap|123794397|86866247|2e2f7d91-36e2-48b0-aa24-1ab9b7cbb1b7|5b9a285c-d6b9-4fc5-a2e8-7dda0a372a2f",
+          ""
+        ],
+        [
+          "silk_overlap|145500000|103954819|e5369fc1-7631-4db9-8020-61ea89464268|e5369fc1-7631-4db9-8020-61ea89464268",
           ""
         ]
       ],
@@ -184,7 +192,7 @@
         "min_track_width": 0.0,
         "min_via_annular_width": 0.1,
         "min_via_diameter": 0.5,
-        "solder_mask_to_copper_clearance": 0.0,
+        "solder_mask_to_copper_clearance": 0.005,
         "use_height_for_length_calcs": true
       },
       "teardrop_options": [
@@ -562,7 +570,7 @@
         "pattern": "+5V"
       },
       {
-        "netclass": "Default",
+        "netclass": "Power",
         "pattern": "GND"
       }
     ]
@@ -573,7 +581,7 @@
       "idf": "",
       "netlist": "",
       "plot": "C:/Users/bastian.na/Downloads/",
-      "pos_files": "",
+      "pos_files": "production/",
       "specctra_dsn": "",
       "step": "",
       "svg": "",
@@ -583,7 +591,7 @@
   },
   "schematic": {
     "annotate_start_num": 0,
-    "bom_export_filename": "${PROJECTNAME}.csv",
+    "bom_export_filename": "production\\T-Wall.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
       "field_delimiter": ",",
@@ -680,6 +688,12 @@
           "group_by": false,
           "label": "#",
           "name": "${ITEM_NUMBER}",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "LCSC",
+          "name": "LCSC",
           "show": false
         }
       ],

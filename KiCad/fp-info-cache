@@ -1,4 +1,4 @@
-27330798858687691
+27334346428863845
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -107905,6 +107905,13 @@ Varistor VF
 2
 2
 footprints
+2086-1107_300-000_997-607
+
+2086-1107/300-000/997-607 
+0
+14
+14
+footprints
 2086-1208_700-000_997-607
 
 2086-1208/700-000/997-607 
@@ -107918,6 +107925,13 @@ ESP32-S3
 0
 44
 44
+footprints
+SN74AHCT125RGYR
+
+SN74AHCT125RGYR 
+0
+15
+15
 footprints
 SN74HCT125N
 
