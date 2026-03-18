@@ -60,39 +60,11 @@
       ],
       "drc_exclusions": [
         [
-          "clearance|154437500|51442500|37fe581b-e8f1-4064-933b-48b22b670d27|5decbdf2-b4d3-4c8a-9efe-098b336faa24",
+          "clearance|151537500|63190000|4307c369-5537-47ec-9074-9ba0170ad07e|bc1c7d58-1073-4cca-b542-061a34b4ee2b",
           ""
         ],
         [
-          "clearance|154437500|52642500|455886e3-f9ce-4438-9aa6-bca41d6c1d10|e9b1988a-3830-4649-a31a-758850d42010",
-          ""
-        ],
-        [
-          "clearance|154437500|53242500|e9b1988a-3830-4649-a31a-758850d42010|32773085-cf30-4ca2-a052-fbc62d5a269c",
-          ""
-        ],
-        [
-          "clearance|157487500|51817500|8558ff53-e196-43db-a745-8a8014e5f59b|7edde9ba-6218-4c42-a63d-31f8e5b8becf",
-          ""
-        ],
-        [
-          "clearance|157487500|52417500|31bb9121-32af-423a-9c80-5853d120fd56|8558ff53-e196-43db-a745-8a8014e5f59b",
-          ""
-        ],
-        [
-          "clearance|157487500|53017500|0c8f1623-f9b9-4f8f-b588-2660f8636e7f|31bb9121-32af-423a-9c80-5853d120fd56",
-          ""
-        ],
-        [
-          "drill_out_of_range|155500000|51500000|5f98eb48-c07f-4c74-aeb0-1ecc93b25576|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "drill_out_of_range|155500000|52530000|83adb16b-1b0d-4526-aa97-678a03577f51|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "drill_out_of_range|155500000|53560000|008a7a87-269f-48e2-abb7-8d884fe160c2|00000000-0000-0000-0000-000000000000",
+          "clearance|153337500|62810000|d20f6eda-0e34-4ff1-83d4-a11992e355b1|7c64b02f-b217-412f-89ee-5fb765b7ae46",
           ""
         ],
         [
@@ -101,14 +73,6 @@
         ],
         [
           "silk_edge_clearance|138583320|49876880|31c43b89-d466-4b4e-9d66-a3db1f9fb0a8|1df3a264-2f80-4e9d-b4ab-f3f999df101b",
-          ""
-        ],
-        [
-          "silk_overlap|123794397|86866247|2e2f7d91-36e2-48b0-aa24-1ab9b7cbb1b7|5b9a285c-d6b9-4fc5-a2e8-7dda0a372a2f",
-          ""
-        ],
-        [
-          "silk_overlap|145500000|103954819|e5369fc1-7631-4db9-8020-61ea89464268|e5369fc1-7631-4db9-8020-61ea89464268",
           ""
         ]
       ],
@@ -562,15 +526,15 @@
     "netclass_assignments": null,
     "netclass_patterns": [
       {
-        "netclass": "Power",
+        "netclass": "Default",
         "pattern": "+3.3V"
       },
       {
-        "netclass": "Power",
+        "netclass": "Default",
         "pattern": "+5V"
       },
       {
-        "netclass": "Power",
+        "netclass": "Default",
         "pattern": "GND"
       }
     ]
