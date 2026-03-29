@@ -5736,6 +5736,12 @@
 		(uuid "506fef60-c240-4575-845e-34920c144f9d")
 	)
 	(junction
+		(at 320.04 147.32)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "567d198d-4818-4a39-87e0-d37b749d4b36")
+	)
+	(junction
 		(at 142.24 231.14)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6955,6 +6961,16 @@
 	)
 	(wire
 		(pts
+			(xy 322.58 147.32) (xy 320.04 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "da374023-9a9b-4f5a-9aef-91c4f56603d7")
+	)
+	(wire
+		(pts
 			(xy 111.76 158.75) (xy 119.38 158.75)
 		)
 		(stroke
@@ -7042,6 +7058,16 @@
 			(type default)
 		)
 		(uuid "e729c0a1-ca90-4f2b-814f-82646062a04a")
+	)
+	(wire
+		(pts
+			(xy 320.04 147.32) (xy 303.53 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e8697e8b-5c8a-4c65-bd04-c16a7dabede5")
 	)
 	(wire
 		(pts
@@ -12950,7 +12976,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 303.53 147.32 270)
+		(at 322.58 147.32 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12959,7 +12985,7 @@
 		(fields_autoplaced yes)
 		(uuid "77d6273b-5d4d-48e9-8319-f796fb647b4e")
 		(property "Reference" "#PWR010"
-			(at 299.72 147.32 0)
+			(at 318.77 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12968,7 +12994,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 307.34 147.3199 90)
+			(at 326.39 147.3199 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12977,7 +13003,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 303.53 147.32 0)
+			(at 322.58 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12986,7 +13012,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 303.53 147.32 0)
+			(at 322.58 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12995,7 +13021,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 303.53 147.32 0)
+			(at 322.58 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13782,6 +13808,82 @@
 			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "#PWR064")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 320.04 143.51 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9bbc9ee1-7e0a-407b-83f0-706e36843326")
+		(property "Reference" "C6"
+			(at 323.85 143.51 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100n"
+			(at 326.39 143.51 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
+			(at 321.0052 147.32 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 320.04 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 320.04 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 320.04 143.51 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b604dff2-bee9-4208-848e-05a97012043d")
+		)
+		(pin "2"
+			(uuid "43f9e5a1-5127-4f42-903b-927b3272a50d")
+		)
+		(instances
+			(project "T-Wall"
+				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
+					(reference "C6")
 					(unit 1)
 				)
 			)
@@ -17234,6 +17336,71 @@
 			(project "T-Wall"
 				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 320.04 139.7 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fa76e74e-257e-4c65-9742-b4fff9a5a842")
+		(property "Reference" "#PWR036"
+			(at 320.04 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 317.5 138.43 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 320.04 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 320.04 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 320.04 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "65681f31-3e04-4a1b-b3a7-d55761f66ea1")
+		)
+		(instances
+			(project "T-Wall"
+				(path "/7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
+					(reference "#PWR036")
 					(unit 1)
 				)
 			)
