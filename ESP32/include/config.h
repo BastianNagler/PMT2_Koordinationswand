@@ -26,7 +26,7 @@ Do not use GPIOs:
 
 
 // --- LEDs ---
-#define NUM_LEDS_PER_FIELD 300
+#define NUM_LEDS_PER_FIELD 10
 #define NUM_LEDS (NUM_FIELDS * NUM_LEDS_PER_FIELD)
 
 #ifdef USE_WS2812B_LEDS

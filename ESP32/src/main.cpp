@@ -7,7 +7,7 @@
 #endif
 
 #ifdef USE_WS2812B_LEDS
-    #define FASTLED_USES_ESP32S3_I2S
+    #define FASTLED_ESP32_I2S
     #include <FastLED.h>
 #else
     typedef struct{
