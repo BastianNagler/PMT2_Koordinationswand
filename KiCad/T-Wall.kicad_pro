@@ -60,14 +60,6 @@
       ],
       "drc_exclusions": [
         [
-          "clearance|151537500|63190000|4307c369-5537-47ec-9074-9ba0170ad07e|bc1c7d58-1073-4cca-b542-061a34b4ee2b",
-          ""
-        ],
-        [
-          "clearance|153337500|62810000|d20f6eda-0e34-4ff1-83d4-a11992e355b1|7c64b02f-b217-412f-89ee-5fb765b7ae46",
-          ""
-        ],
-        [
           "silk_edge_clearance|120600120|49876880|31c43b89-d466-4b4e-9d66-a3db1f9fb0a8|0ae6a70a-8ef8-4780-896e-c267ef5033ee",
           ""
         ],
@@ -204,7 +196,9 @@
         }
       ],
       "track_widths": [
-        0.0
+        0.0,
+        0.2,
+        0.8
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -526,15 +520,15 @@
     "netclass_assignments": null,
     "netclass_patterns": [
       {
-        "netclass": "Default",
+        "netclass": "Power",
         "pattern": "+3.3V"
       },
       {
-        "netclass": "Default",
+        "netclass": "Power",
         "pattern": "+5V"
       },
       {
-        "netclass": "Default",
+        "netclass": "Power",
         "pattern": "GND"
       }
     ]
