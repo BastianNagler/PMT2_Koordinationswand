@@ -5700,6 +5700,12 @@
 		)
 	)
 	(junction
+		(at 368.3 43.18)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0132d5fe-8333-4028-a693-52677fea879f")
+	)
+	(junction
 		(at 93.98 344.17)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5794,12 +5800,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "9d198147-83f1-4611-ac9b-9e153c17d4f0")
-	)
-	(junction
-		(at 368.3 48.26)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "a210ff83-8fbd-4e7c-bc84-2afc43006190")
 	)
 	(junction
 		(at 387.35 33.02)
@@ -6021,16 +6021,6 @@
 	)
 	(wire
 		(pts
-			(xy 365.76 43.18) (xy 365.76 48.26)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0bcbb88c-24bd-4925-8112-08bf1fb46be2")
-	)
-	(wire
-		(pts
 			(xy 119.38 212.09) (xy 119.38 217.17)
 		)
 		(stroke
@@ -6121,7 +6111,7 @@
 	)
 	(wire
 		(pts
-			(xy 368.3 48.26) (xy 373.38 48.26)
+			(xy 368.3 43.18) (xy 373.38 43.18)
 		)
 		(stroke
 			(width 0)
@@ -6291,16 +6281,6 @@
 	)
 	(wire
 		(pts
-			(xy 368.3 49.53) (xy 368.3 48.26)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4b860bde-7546-4515-8d2e-e60f41705363")
-	)
-	(wire
-		(pts
 			(xy 111.76 209.55) (xy 137.16 209.55)
 		)
 		(stroke
@@ -6431,7 +6411,7 @@
 	)
 	(wire
 		(pts
-			(xy 365.76 48.26) (xy 368.3 48.26)
+			(xy 365.76 43.18) (xy 368.3 43.18)
 		)
 		(stroke
 			(width 0)
@@ -8680,7 +8660,7 @@
 		(uuid "de7b34b9-d1a1-4c1d-a25a-441d87eaf074")
 	)
 	(label "DCDC_PGood"
-		(at 373.38 48.26 0)
+		(at 373.38 43.18 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10200,7 +10180,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 368.3 54.61 180)
+		(at 368.3 48.26 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10209,7 +10189,7 @@
 		(fields_autoplaced yes)
 		(uuid "2f396176-a67d-4565-b929-9c943d87d7b7")
 		(property "Reference" "#PWR035"
-			(at 368.3 50.8 0)
+			(at 368.3 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10218,7 +10198,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 368.3 59.69 0)
+			(at 368.3 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10226,7 +10206,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 368.3 54.61 0)
+			(at 368.3 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10235,7 +10215,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 368.3 54.61 0)
+			(at 368.3 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10244,7 +10224,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 368.3 54.61 0)
+			(at 368.3 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14646,7 +14626,7 @@
 	)
 	(symbol
 		(lib_id "Device:R_Small")
-		(at 368.3 52.07 180)
+		(at 368.3 45.72 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -14654,7 +14634,7 @@
 		(dnp no)
 		(uuid "b22d7149-3163-4854-bb3c-e7dcc6f966af")
 		(property "Reference" "R14"
-			(at 367.284 53.086 0)
+			(at 367.284 46.736 0)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -14663,7 +14643,7 @@
 			)
 		)
 		(property "Value" "10k"
-			(at 367.538 51.308 0)
+			(at 367.538 44.958 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14672,7 +14652,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
-			(at 368.3 52.07 0)
+			(at 368.3 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14681,7 +14661,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 368.3 52.07 0)
+			(at 368.3 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14690,7 +14670,7 @@
 			)
 		)
 		(property "Description" "Resistor, small symbol"
-			(at 368.3 52.07 0)
+			(at 368.3 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14699,7 +14679,7 @@
 			)
 		)
 		(property "LCSC" "C25804"
-			(at 368.3 52.07 0)
+			(at 368.3 45.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
