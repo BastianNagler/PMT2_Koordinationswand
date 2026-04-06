@@ -6,19 +6,12 @@
     #include <ESP_IOExpander_Library.h>
 #endif
 
-#ifdef USE_WS2812B_LEDS
-    #define FASTLED_ESP32_I2S
-    #define FASTLED_USES_ESP32S3_I2S
-    #include <FastLED.h>
-#else
-    typedef struct{
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-    } CRGB;
-#endif
+#define FASTLED_ESP32_I2S
+#define FASTLED_USES_ESP32S3_I2S
+#include <FastLED.h>
 
 
+const CRGB fsei = CRGB(0x3faecc);
 
 
 #ifdef USE_IO_EXPANDER
@@ -89,29 +82,13 @@ void setup()
     #endif
 
     // --- LEDs ---
-    #ifdef USE_WS2812B_LEDS
-        // --- WS2812B LEDs ---
-        Serial.println("ESP32-S3 Setup LEDs..."); // TODO: Delete
-        
-        FastLED.addLeds<WS2812B, WS2812B_DATA_PIN, GBR>(leds, NUM_LEDS);
-        FastLED.setBrightness(MAX_BRIGHTNESS);
+    Serial.println("ESP32-S3 Setup LEDs..."); // TODO: Delete
+    
+    FastLED.addLeds<WS2812B, WS2812B_DATA_PIN, GBR>(leds, NUM_LEDS);
+    FastLED.setBrightness(MAX_BRIGHTNESS);
 
-        FastLED.clear();
-        FastLED.show();
-    #else
-        Serial.println("ESP32-S3 Using dumb LEDs..."); // TODO: Delete
-        // --- Dumb LEDs ---
-        for (int i = 0; i < NUM_LEDS; i++)
-        {
-            leds[i].r = 0;
-            leds[i].g = 0;
-            leds[i].b = 0;
-        }
-        // Only using one RGB LED for testing first field, not more intended to be used
-        pinMode(LED_PIN_RED, OUTPUT);
-        pinMode(LED_PIN_GREEN, OUTPUT);
-        pinMode(LED_PIN_BLUE, OUTPUT);
-    #endif
+    FastLED.clear();
+    FastLED.show();
 }
 
 void loop()
@@ -152,39 +129,23 @@ void loop()
 
 
     // --- Update LEDs ---
-    #ifdef USE_WS2812B_LEDS
-        // Pressed: Green, Not pressed: Red
-        for (int i = 0; i < NUM_FIELDS; i++)
+    // Pressed: Green, Not pressed: Red
+    for (int i = 0; i < NUM_FIELDS; i++)
+    {
+        for(int k = 0; k < NUM_LEDS_PER_FIELD; k++)
         {
-            for(int k = 0; k < NUM_LEDS_PER_FIELD; k++)
+            int ledIndex = i * NUM_LEDS_PER_FIELD + k;
+            if (isPressed[i])
             {
-                int ledIndex = i * NUM_LEDS_PER_FIELD + k;
-                if (isPressed[i])
-                {
-                    leds[ledIndex] = CRGB::Green; // Pressed: Green
-                }
-                else
-                {
-                    leds[ledIndex] = CRGB::Red; // Not pressed: Red
-                }
+                leds[ledIndex] = CRGB::Green; // Pressed: Green
+            }
+            else
+            {
+                leds[ledIndex] = fsei; // Not pressed: Red
             }
         }
-        FastLED.show();
-    #else
-        // Only using one RGB LED for testing first field, not more intended to be used
-        if (isPressed[0])
-        {
-            digitalWrite(LED_PIN_RED, LOW);
-            digitalWrite(LED_PIN_GREEN, HIGH);
-            digitalWrite(LED_PIN_BLUE, LOW);
-        }
-        else
-        {
-            digitalWrite(LED_PIN_RED, HIGH);
-            digitalWrite(LED_PIN_GREEN, LOW);
-            digitalWrite(LED_PIN_BLUE, LOW);
-        }
-    #endif
+    }
+    FastLED.show();
 
     delay(20);
 }
