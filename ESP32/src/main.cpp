@@ -137,11 +137,11 @@ void loop()
             int ledIndex = i * NUM_LEDS_PER_FIELD + k;
             if (isPressed[i])
             {
-                leds[ledIndex] = CRGB::Green; // Pressed: Green
+                leds[ledIndex] = CRGB(0x00FFFF); // Pressed: Green
             }
             else
             {
-                leds[ledIndex] = fsei; // Not pressed: Red
+                leds[ledIndex] = CRGB(0xFFFF00); // Not pressed: Red
             }
         }
     }

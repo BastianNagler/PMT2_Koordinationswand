@@ -25,7 +25,7 @@ Do not use GPIOs:
 
 
 // --- LEDs ---
-#define NUM_LEDS_PER_FIELD 10
+#define NUM_LEDS_PER_FIELD 16
 #define NUM_LEDS (NUM_FIELDS * NUM_LEDS_PER_FIELD)
 
 #define WS2812B_DATA_PIN 10 // Change to actual pin
