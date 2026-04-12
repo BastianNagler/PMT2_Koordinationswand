@@ -62,6 +62,38 @@
       ],
       "drc_exclusions": [
         [
+          "clearance|146096264|105890999|1beeb087-c522-493a-b2ea-23d3ce6a4730|8d702f87-d760-4fae-a579-77f42c9f34e8",
+          ""
+        ],
+        [
+          "clearance|146096264|106571000|611a42f4-5cae-4fc9-8600-d564f1de2e8a|8d702f87-d760-4fae-a579-77f42c9f34e8",
+          ""
+        ],
+        [
+          "clearance|146096264|106891000|611a42f4-5cae-4fc9-8600-d564f1de2e8a|c93b2097-71f9-477c-a7a2-33d116f75bae",
+          ""
+        ],
+        [
+          "clearance|146096264|107571000|76f95e12-9608-4067-a240-f50376348714|c93b2097-71f9-477c-a7a2-33d116f75bae",
+          ""
+        ],
+        [
+          "clearance|149554999|106071001|ff03509e-40f3-4d10-8996-9a338fa66bcd|1aab2ac6-9b2e-4681-85a2-e5f862aed605",
+          ""
+        ],
+        [
+          "clearance|149554999|106571000|0a435ba3-aee5-4523-8a11-c0ee6cdbdee2|ff03509e-40f3-4d10-8996-9a338fa66bcd",
+          ""
+        ],
+        [
+          "clearance|149554999|107070999|cafc5e10-b9a3-4065-ab57-4c21480823f0|0a435ba3-aee5-4523-8a11-c0ee6cdbdee2",
+          ""
+        ],
+        [
+          "clearance|149554999|107571001|e2b8835c-38b2-48dc-9079-852ee87c2054|cafc5e10-b9a3-4065-ab57-4c21480823f0",
+          ""
+        ],
+        [
           "silk_edge_clearance|120600120|50000000|31c43b89-d466-4b4e-9d66-a3db1f9fb0a8|0ae6a70a-8ef8-4780-896e-c267ef5033ee",
           ""
         ],
@@ -70,7 +102,7 @@
           ""
         ],
         [
-          "silk_overlap|147499999|103480572|8ee64d24-993c-45c1-9b32-001aa3094463|9e4784a5-8b39-4cf9-b848-6574ada53665",
+          "silk_overlap|147380951|103432953|8ee64d24-993c-45c1-9b32-001aa3094463|9e4784a5-8b39-4cf9-b848-6574ada53665",
           ""
         ]
       ],
@@ -209,6 +241,7 @@
       "track_widths": [
         0.0,
         0.2,
+        0.6,
         0.8
       ],
       "tuning_pattern_settings": {
@@ -561,7 +594,7 @@
     "netclass_assignments": null,
     "netclass_patterns": [
       {
-        "netclass": "Power",
+        "netclass": "Default",
         "pattern": "+3.3V"
       },
       {
@@ -764,7 +797,7 @@
         "uuid": "7dc9e5b9-dd7a-4571-90c7-051ff63df3d4"
       }
     ],
-    "used_designators": "",
+    "used_designators": "U1-4,U7,H1-4,#PWR58",
     "variants": []
   },
   "sheets": [
