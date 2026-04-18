@@ -1,6 +1,6 @@
 #include "MCP23017.h"
 
-static void IRAM_ATTR irqHandler(void* arg)
+static void irqHandler(void* arg)
 {
     MCP23017* mcp = static_cast<MCP23017*>(arg);
 
