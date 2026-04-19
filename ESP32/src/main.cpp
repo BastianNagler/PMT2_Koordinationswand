@@ -32,7 +32,8 @@
 #define ORANGE  0x00FFA500
 #define PURPLE  0x00800080
 #define WHITE   0x00FFFFFF
-#define OFF   0x00000000
+#define GRAY    0x00AAAAAA
+#define OFF     0x00000000
 
 CRGB leds[NUM_LEDS];
 volatile bool isPressed[NUM_FIELDS];
