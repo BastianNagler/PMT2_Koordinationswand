@@ -130,7 +130,32 @@ void loop()
 }
 
 
+bool ButtonPressed(uint8_t index){
+    if (index >= NUM_FIELDS) return false; 
 
+    #ifdef USE_IO_EXPANDER
+        uint8_t expanderIndex = index / NUM_IO_PER_EXPANDER;
+        uint8_t pinIndex = index % NUM_IO_PER_EXPANDER;
+
+        // 3. Nur diesen einen Expander über I2C auslesen
+        uint16_t pinStates = expanders[expanderIndex].read(); 
+
+        // 4. Nur das gewünschte Bit auswerten und direkt zurückgeben
+        if (ACTIVE_LOW_TOUCH_SENSORS) {
+            return (pinStates & (1 << pinIndex)) == 0; // Active Low
+        } else {
+            return (pinStates & (1 << pinIndex)) != 0; // Active High
+        }
+
+    #else
+        // Direkter GPIO-Read, falls keine Expander genutzt werden
+        if (ACTIVE_LOW_BUTTONS) {
+            return digitalRead(buttonPins[index]) == LOW; // Active Low
+        } else {
+            return digitalRead(buttonPins[index]) == HIGH; // Active High
+        }
+    #endif
+}
 
 uint8_t getRandomGenerator(){
     return esp_random() % NUM_FIELDS;
@@ -148,7 +173,7 @@ void level(uint8_t* score, uint32_t startTime)
     lastfield = nextfield;
     leds.set_rgb(CYAN,nextfield);
     leds.show();
-    while (isPressed[nextfield] == false){
+    while (ButtonPressed(nextfield) == false){
         if (((esp_timer_get_time() / 1000) - startTime) >= 60000) {return;}
     }
     (*score) ++;
@@ -183,7 +208,7 @@ void JOHANNES_loop()
         leds.set_rgb(OFF,0);
     }
     FastLED.show();
-    if(isPressed[0] == true || isPressed[1] == true){
+    if(ButtonPressed(0) == true || ButtonPressed(1) == true){
         uint32_t score = startgame();
         Serial.printf("Zeit abgelaufen! Dein Score ist: %d\n", score);
     }
