@@ -1,26 +1,12 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include <esp_timer.h>
+
 #include "config.h"
-#include "esp_timer.h"
+#include "leds.h"
 
 #ifdef USE_IO_EXPANDER
     #include "MCP23017.h"
-#endif
-
-#ifdef FastLED_USE_I2S
-    #define FASTLED_ESP32_I2S
-    #define FASTLED_USES_ESP32S3_I2S
-#endif
-#include <FastLED.h>
-
-#ifdef USE_IO_EXPANDER
-    MCP23017 expander0(0x20, IO_EXPANDER_0_IRQ_PIN);
-    MCP23017 expander1(0x21, IO_EXPANDER_1_IRQ_PIN);
-    MCP23017 expander2(0x22, IO_EXPANDER_2_IRQ_PIN);
-    MCP23017 expander3(0x23, IO_EXPANDER_3_IRQ_PIN);
-    MCP23017 expanders[NUM_IO_EXPANDER] = {expander0, expander1, expander2, expander3};
-#else
-    uint8_t buttonPins[NUM_FIELDS] = BUTTON_PINS;
 #endif
 
 #define RED     0x00FF0000
@@ -35,8 +21,21 @@
 #define GRAY    0x00AAAAAA
 #define OFF     0x00000000
 
-CRGB leds[NUM_LEDS];
+
+
+#ifdef USE_IO_EXPANDER
+    MCP23017 expander0(0x20, IO_EXPANDER_0_IRQ_PIN);
+    MCP23017 expander1(0x21, IO_EXPANDER_1_IRQ_PIN);
+    MCP23017 expander2(0x22, IO_EXPANDER_2_IRQ_PIN);
+    MCP23017 expander3(0x23, IO_EXPANDER_3_IRQ_PIN);
+    MCP23017 expanders[NUM_IO_EXPANDER] = {expander0, expander1, expander2, expander3};
+#else
+    uint8_t buttonPins[NUM_FIELDS] = BUTTON_PINS;
+#endif
+
 volatile bool isPressed[NUM_FIELDS];
+
+LED_Driver leds;
 
 void setup()
 {
@@ -73,31 +72,72 @@ void setup()
 
     // --- LEDs ---
     Serial.println("ESP32-S3 Setup LEDs..."); // TODO: Delete
-    #ifdef FastLED_USE_I2S
-        FastLED.addLeds<WS2812B, WS2812B_DATA_PIN, GBR>(leds, NUM_LEDS);
+    leds.init();
+}
+
+void loop()
+{
+    // --- Read Inputs ---
+    #ifdef USE_IO_EXPANDER
+        // Read IO-Expander states if needed
+        for (int i = 0; i < NUM_IO_EXPANDER; i++)
+        {
+            if (expanders[i].needsRead)
+            {
+                uint16_t pinStates = expanders[i].read(); // Read all pins at once
+                for (int k = 0; k < NUM_IO_PER_EXPANDER; k++)
+                {
+                    Serial.printf("ESP32-S3 Reading IO Expander %d Pin %d\n", i, k); // TODO: Delete
+                    int fieldIndex = i * NUM_IO_PER_EXPANDER + k;
+                    if (fieldIndex < NUM_FIELDS)
+                    {
+                        if (ACTIVE_LOW_TOUCH_SENSORS)
+                            isPressed[fieldIndex] = (pinStates & (1 << k)) == 0; // Active Low
+                        else
+                            isPressed[fieldIndex] = (pinStates & (1 << k)) != 0; // Active High
+                    }
+                }
+            }
+        }
     #else
-        FastLED.addLeds<WS2812B, WS2812B_DATA_PIN, GRB>(leds, NUM_LEDS);
+        // Read button states directly from GPIO
+        for (int i = 0; i < NUM_FIELDS; i++)
+        {
+            if (ACTIVE_LOW_BUTTONS)
+                isPressed[i] = digitalRead(buttonPins[i]) == LOW; // Active Low
+            else
+                isPressed[i] = digitalRead(buttonPins[i]) == HIGH; // Active High
+        }
     #endif
 
-    FastLED.setBrightness(MAX_BRIGHTNESS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 2500);
 
-    FastLED.clear();
-    FastLED.show();
+    // --- Update LEDs ---
+    // Pressed: Green, Not pressed: Red
+    for (int i = 0; i < NUM_FIELDS; i++)
+    {
+        if (isPressed[i])
+        {
+            leds.set_rgb(YELLOW, i); // Pressed: Yellow
+        }
+        else
+        {
+            leds.set_rgb(CYAN, i); // Not pressed: Cyan
+        }
     }
+    leds.show();
 
-
-
-//nur zum build!!! Basti macht das selbst
-void set_rgb(uint32_t hex, uint8_t index){
-    //TODO
+    delay(20);
 }
+
+
+
 
 uint8_t getRandomGenerator(){
     return esp_random() % NUM_FIELDS;
 }
 
-void level(uint8_t* score, uint32_t startTime){
+void level(uint8_t* score, uint32_t startTime)
+{
     static uint8_t lastfield = 99;
     uint8_t nextfield;
 
@@ -106,16 +146,18 @@ void level(uint8_t* score, uint32_t startTime){
         nextfield = getRandomGenerator();
     } while (nextfield == lastfield);
     lastfield = nextfield;
-    set_rgb(CYAN,nextfield);
-    FastLED.show();
+    leds.set_rgb(CYAN,nextfield);
+    leds.show();
     while (isPressed[nextfield] == false){
         if (((esp_timer_get_time() / 1000) - startTime) >= 60000) {return;}
     }
     (*score) ++;
-    set_rgb(OFF,nextfield);
-    FastLED.show();
+    leds.set_rgb(OFF,nextfield);
+    leds.show();
 }
-uint16_t startgame(){
+
+uint16_t startgame()
+{
     uint8_t score = 0;
     uint32_t startTime = esp_timer_get_time() / 1000;
     while ((esp_timer_get_time() / 1000) - startTime < 60000) {
@@ -124,15 +166,22 @@ uint16_t startgame(){
     return score;
 }
 
-void loop()
+void JOHANNES_loop()
 {   
     static uint8_t help_blink = 0;
     help_blink ^= (1<<0);
     //die erste Box blinkt bis Spiel startet --> idle
     for (int i = 0; i<NUM_FIELDS; i++){
-        set_rgb(OFF,i);
+        leds.set_rgb(OFF,i);
     }
-    if(help_blink==1){set_rgb(YELLOW,0);}else{set_rgb(OFF,0)};
+    if(help_blink==1)
+    {
+        leds.set_rgb(YELLOW,0);
+    }
+    else
+    {
+        leds.set_rgb(OFF,0);
+    }
     FastLED.show();
     if(isPressed[0] == true || isPressed[1] == true){
         uint32_t score = startgame();
