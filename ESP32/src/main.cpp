@@ -26,6 +26,7 @@ LED_Driver leds;
 
 void setup()
 {
+    loadHighscores();
     Serial.begin(115200);
     delay(5 * 1000); // Delay for 5 seconds to allow LEDs to fully power on 
     Serial.println("ESP32-S3 Setup Start...");

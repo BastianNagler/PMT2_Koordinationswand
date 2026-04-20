@@ -1,9 +1,8 @@
 #pragma once
-#ifndef TWALLGAME_H
-#define TWALLGAME_H
 
 #include <Arduino.h>
 #include "config.h"
+#include <Preferences.h>
 #include "leds.h"
 
 // --- Farb-Definitionen (am besten hier zentral ablegen) ---
@@ -31,9 +30,11 @@ extern LED_Driver leds;
 extern GameState gameState;
 extern GameMode currentMode;
 
+// --- Highscore Variablen ---
+extern uint8_t highscores[10];
+void loadHighscores();
+void checkAndAddHighscore(uint8_t newScore);
 // --- Funktions-Prototypen ---
 uint8_t getRandomGenerator(uint8_t min, uint8_t max);
 void set_next_target(uint8_t player);
 void runGameLogic(uint32_t currentTime);
-
-#endif

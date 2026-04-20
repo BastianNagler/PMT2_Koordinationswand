@@ -1,5 +1,8 @@
 #include "TwallGame.h"
 
+Preferences preferences;
+uint8_t highscores[10] = {0,0,0,0,0,0,0,0,0,0};
+
 // --- Variablen für die State Machine initialisieren ---
 GameState gameState = IDLE;
 GameMode currentMode = SINGLE_PLAYER;
@@ -12,6 +15,47 @@ uint8_t lastP1 = 99;
 uint8_t lastP2 = 99;
 
 uint32_t gameStartTime = 0;
+
+void loadHighscores() {
+    preferences.begin("game-data", false); // Ordner "game-data" öffnen
+    // Versuche das Array zu lesen. Wenn nicht vorhanden, bleibt es bei 0.
+    preferences.getBytes("top10", highscores, 10);
+    preferences.end();
+    
+    Serial.println("Highscores geladen:");
+    for(int i=0; i<10; i++) Serial.printf("%d. %d\n", i+1, highscores[i]);
+}
+
+void saveHighscores() {
+    preferences.begin("game-data", false);
+    preferences.putBytes("top10", highscores, 10);
+    preferences.end();
+}
+
+void checkAndAddHighscore(uint8_t newScore) {
+    if (newScore <= highscores[9]) return; // Nicht gut genug für Top 10
+
+    // Platz finden
+    int insertPos = 9;
+    for (int i = 0; i < 10; i++) {
+        if (newScore > highscores[i]) {
+            insertPos = i;
+            break;
+        }
+    }
+
+    // Alle Scores darunter um eins nach hinten schieben
+    for (int i = 9; i > insertPos; i--) {
+        highscores[i] = highscores[i-1];
+    }
+
+    // Neuen Score einfügen
+    highscores[insertPos] = newScore;
+    
+    // Speichern
+    saveHighscores();
+    Serial.println("Neuer Highscore gespeichert!");
+}
 
 uint8_t getRandomGenerator(uint8_t min, uint8_t max){
     // Verhindert Division durch 0, falls min und max gleich sind 
@@ -120,10 +164,12 @@ void runGameLogic(uint32_t currentTime) {
         case GAME_OVER:
             if (currentMode == SINGLE_PLAYER) {
                 Serial.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
+
             } else {
                 Serial.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
+                checkAndAddHighscore(scoreP2);
             }
-            
+            checkAndAddHighscore(scoreP1);
             for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i); 
              
             gameState = IDLE;            

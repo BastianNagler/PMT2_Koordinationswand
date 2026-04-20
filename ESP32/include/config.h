@@ -36,6 +36,9 @@ Do not use GPIOs:
 
 #define MAX_BRIGHTNESS 255 // Adjust brightness as needed, 0-255
 
+#define I2C_SCREEN_0 21
+#define I2C_SCREEN_1 47
+
 // --- IO-Expander ---
 // #define USE_IO_EXPANDER
 
