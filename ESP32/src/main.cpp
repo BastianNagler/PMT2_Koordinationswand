@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <esp_timer.h>
-#include "TwallGame.h"
 
+#include "TwallGame.h"
 #include "config.h"
 #include "leds.h"
 
