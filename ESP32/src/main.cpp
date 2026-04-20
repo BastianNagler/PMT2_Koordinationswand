@@ -181,14 +181,14 @@ void level(uint8_t* score, uint32_t startTime)
     leds.show();
 }
 
-uint16_t startgame()
+void startgame()
 {
     uint8_t score = 0;
     uint32_t startTime = esp_timer_get_time() / 1000;
     while ((esp_timer_get_time() / 1000) - startTime < 60000) {
         level(&score, startTime);
     }
-    return score;
+    Serial.printf("Zeit abgelaufen! Dein Score ist: %d\n", score);
 }
 
 void JOHANNES_loop()
@@ -209,8 +209,7 @@ void JOHANNES_loop()
     }
     FastLED.show();
     if(ButtonPressed(0) == true || ButtonPressed(1) == true){
-        uint32_t score = startgame();
-        Serial.printf("Zeit abgelaufen! Dein Score ist: %d\n", score);
+        startgame();
     }
     delay(5000);
 }
