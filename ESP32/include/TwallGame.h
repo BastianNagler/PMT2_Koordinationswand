@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TWALLGAME_H
 #define TWALLGAME_H
 
