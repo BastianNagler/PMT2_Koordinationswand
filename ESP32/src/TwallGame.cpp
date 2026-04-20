@@ -12,8 +12,6 @@ uint8_t lastP1 = 99;
 uint8_t lastP2 = 99;
 
 uint32_t gameStartTime = 0;
-uint32_t lastBlinkTime = 0;
-uint8_t help_blink = 0;
 
 uint8_t getRandomGenerator(uint8_t min, uint8_t max){
     return esp_random() % (max-min) + min;
@@ -62,15 +60,11 @@ void runGameLogic(uint32_t currentTime) {
     switch (gameState) {
         
         case IDLE:
-            if (currentTime - lastBlinkTime >= 500) {
-                lastBlinkTime = currentTime;
-                for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
-                
-                if (help_blink == 1) {
+            for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
+            if ((currentTime / 500) % 2 == 0) {
                     leds.set_rgb(YELLOW, 0); // Taste für 1-Spieler
                     leds.set_rgb(BLUE, 1);   // Taste für 2-Spieler
                 }
-            }
 
             // Startbedingung prüfen
             if (isPressed[0] || isPressed[1]) {
@@ -128,8 +122,7 @@ void runGameLogic(uint32_t currentTime) {
             }
             
             for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i); 
-            
-            lastBlinkTime = currentTime; 
+             
             gameState = IDLE;            
             break;
     }
