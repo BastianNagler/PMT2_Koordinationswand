@@ -34,6 +34,16 @@
 #endif
 
 volatile bool isPressed[NUM_FIELDS];
+enum GameState { IDLE, PLAYING, GAME_OVER };
+GameState gameState = IDLE;
+
+uint8_t score = 0;
+uint32_t gameStartTime = 0;
+uint32_t lastBlinkTime = 0;
+uint8_t help_blink = 0;
+
+uint8_t currentTargetField = 99;
+uint8_t lastField = 99;
 
 LED_Driver leds;
 
@@ -74,9 +84,7 @@ void setup()
     Serial.println("ESP32-S3 Setup LEDs..."); // TODO: Delete
     leds.init();
 }
-
-void loop()
-{
+void read(){
     // --- Read Inputs ---
     #ifdef USE_IO_EXPANDER
         // Read IO-Expander states if needed
@@ -109,107 +117,81 @@ void loop()
                 isPressed[i] = digitalRead(buttonPins[i]) == HIGH; // Active High
         }
     #endif
+}
 
+uint8_t getRandomGenerator(uint8_t min, uint8_t max){
+    return esp_random() % (max-min) + min;
+}
+void setup_next_level() {
+    //do {
+        currentTargetField = getRandomGenerator(0,NUM_FIELDS);
+    //} while (currentTargetField == lastField);
+    
+    lastField = currentTargetField;
+    leds.set_rgb(CYAN, currentTargetField);
+}
 
-    // --- Update LEDs ---
-    // Pressed: Green, Not pressed: Red
-    for (int i = 0; i < NUM_FIELDS; i++)
-    {
-        if (isPressed[i])
-        {
-            leds.set_rgb(YELLOW, i); // Pressed: Yellow
-        }
-        else
-        {
-            leds.set_rgb(CYAN, i); // Not pressed: Cyan
-        }
+void runGameLogic(uint32_t currentTime) {
+    switch (gameState) {
+        
+        case IDLE:
+            if (currentTime - lastBlinkTime >= 500) {
+                lastBlinkTime = currentTime;
+                help_blink ^= 1;
+                
+                for (int i = 0; i < NUM_FIELDS; i++) {
+                    leds.set_rgb(OFF, i);
+                }
+                
+                if (help_blink == 1) {
+                    leds.set_rgb(YELLOW, 0);
+                    leds.set_rgb(BLUE,1);
+                }
+            }
+
+            // Startbedingung prüfen
+            if (isPressed[0] || isPressed[1]) {
+                score = 0;
+                lastField = 99; // Reset
+                gameStartTime = currentTime;
+                
+                for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i); // Alle LEDs aus
+                setup_next_level(); // Erstes Ziel generieren
+                
+                gameState = PLAYING;
+            }
+            break;
+
+        case PLAYING:
+            if (currentTime - gameStartTime >= 60000) {
+                // Zeit abgelaufen!
+                gameState = GAME_OVER;
+            } else {
+                // Warten auf Tastendruck des korrekten Feldes
+                if (isPressed[currentTargetField]) {
+                    score++;
+                    leds.set_rgb(OFF, currentTargetField);
+                    setup_next_level(); // Nächstes Ziel generieren
+                }
+            }
+            break;
+
+        case GAME_OVER:
+            Serial.printf("Zeit abgelaufen! Dein Score ist: %d\n", score);
+            for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i); // Alles aus
+            
+            lastBlinkTime = currentTime; 
+            gameState = IDLE;            
+            break;
     }
+}
+
+
+void loop()
+{
+    read();
+    runGameLogic(millis());
     leds.show();
 
     delay(20);
-}
-
-
-bool ButtonPressed(uint8_t index){
-    if (index >= NUM_FIELDS) return false; 
-
-    #ifdef USE_IO_EXPANDER
-        uint8_t expanderIndex = index / NUM_IO_PER_EXPANDER;
-        uint8_t pinIndex = index % NUM_IO_PER_EXPANDER;
-
-        // 3. Nur diesen einen Expander über I2C auslesen
-        uint16_t pinStates = expanders[expanderIndex].read(); 
-
-        // 4. Nur das gewünschte Bit auswerten und direkt zurückgeben
-        if (ACTIVE_LOW_TOUCH_SENSORS) {
-            return (pinStates & (1 << pinIndex)) == 0; // Active Low
-        } else {
-            return (pinStates & (1 << pinIndex)) != 0; // Active High
-        }
-
-    #else
-        // Direkter GPIO-Read, falls keine Expander genutzt werden
-        if (ACTIVE_LOW_BUTTONS) {
-            return digitalRead(buttonPins[index]) == LOW; // Active Low
-        } else {
-            return digitalRead(buttonPins[index]) == HIGH; // Active High
-        }
-    #endif
-}
-
-uint8_t getRandomGenerator(){
-    return esp_random() % NUM_FIELDS;
-}
-
-void level(uint8_t* score, uint32_t startTime)
-{
-    static uint8_t lastfield = 99;
-    uint8_t nextfield;
-
-    // Würfelt so lange neu, bis ein ANDERES Feld als beim letzten Mal herauskommt.
-    do{
-        nextfield = getRandomGenerator();
-    } while (nextfield == lastfield);
-    lastfield = nextfield;
-    leds.set_rgb(CYAN,nextfield);
-    leds.show();
-    while (ButtonPressed(nextfield) == false){
-        if (((esp_timer_get_time() / 1000) - startTime) >= 60000) {return;}
-    }
-    (*score) ++;
-    leds.set_rgb(OFF,nextfield);
-    leds.show();
-}
-
-void startgame()
-{
-    uint8_t score = 0;
-    uint32_t startTime = esp_timer_get_time() / 1000;
-    while ((esp_timer_get_time() / 1000) - startTime < 60000) {
-        level(&score, startTime);
-    }
-    Serial.printf("Zeit abgelaufen! Dein Score ist: %d\n", score);
-}
-
-void JOHANNES_loop()
-{   
-    static uint8_t help_blink = 0;
-    help_blink ^= (1<<0);
-    //die erste Box blinkt bis Spiel startet --> idle
-    for (int i = 0; i<NUM_FIELDS; i++){
-        leds.set_rgb(OFF,i);
-    }
-    if(help_blink==1)
-    {
-        leds.set_rgb(YELLOW,0);
-    }
-    else
-    {
-        leds.set_rgb(OFF,0);
-    }
-    FastLED.show();
-    if(ButtonPressed(0) == true || ButtonPressed(1) == true){
-        startgame();
-    }
-    delay(5000);
 }
