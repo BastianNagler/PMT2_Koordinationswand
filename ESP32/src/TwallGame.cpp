@@ -14,48 +14,51 @@ uint8_t lastP2 = 99;
 uint32_t gameStartTime = 0;
 
 uint8_t getRandomGenerator(uint8_t min, uint8_t max){
+    // Verhindert Division durch 0, falls min und max gleich sind 
+    // (z.B. wenn jemand ein 1-Spalten-Spielfeld für 2 Spieler konfiguriert)
+    if (min >= max) return min; 
+    
     return esp_random() % (max-min) + min;
 }
+
+// --- 2. Angepasste Ziel-Generierung ---
 void set_next_target(uint8_t player) {
-    uint8_t minLimit, maxLimit;
-    uint8_t* currentTarget;
-    uint8_t* lastTarget;
+    uint8_t nextField;
+    uint8_t* currentTarget = (player == 1) ? &targetP1 : &targetP2;
+    uint8_t* lastTarget = (player == 1) ? &lastP1 : &lastP2;
     uint32_t color;
 
-    if (currentMode == SINGLE_PLAYER) {
-        // Ein Spieler: Ganzes Spielfeld
-        minLimit = 0; 
-        maxLimit = NUM_FIELDS;
-        currentTarget = &targetP1;
-        lastTarget = &lastP1;
-        color = CYAN;
-    } else { // 2 SPIELER MODUS
-        if (player == 1) {
-            // Player 1: Erste Hälfte
-            minLimit = 0; 
-            maxLimit = NUM_FIELDS / 2;
-            currentTarget = &targetP1;
-            lastTarget = &lastP1;
-            color = MAGENTA; // Eigene Farbe für P1
-        } else {
-            // Player 2: Zweite Hälfte
-            minLimit = NUM_FIELDS / 2; 
-            maxLimit = NUM_FIELDS;
-            currentTarget = &targetP2;
-            lastTarget = &lastP2;
-            color = ORANGE; // Eigene Farbe für P2
+    do {
+        if (currentMode == SINGLE_PLAYER) {
+            color = CYAN;
+            nextField = getRandomGenerator(0, NUM_FIELDS);
+        } 
+        else {
+            color = (player == 1) ? MAGENTA : ORANGE;
+            
+            // 1. Beliebige Zeile auswürfeln (0 bis NUM_ROWS-1)
+            uint8_t randRow = getRandomGenerator(0, NUM_ROWS); 
+            uint8_t randCol;
+            
+            // 2. Spalte je nach Spieler auswürfeln
+            if (player == 1) {
+                // Player 1: Spalten von 0 bis zur Hälfte
+                randCol = getRandomGenerator(0, NUM_COLUMNS / 2);
+            } else {
+                // Player 2: Spalten von der Hälfte bis zum Ende
+                randCol = getRandomGenerator(NUM_COLUMNS / 2, NUM_COLUMNS);
+            }
+            
+            // 3. 2D-Koordinaten wieder in 1D-Index umrechnen
+            nextField = (randRow * NUM_COLUMNS) + randCol;
         }
-    }
+        
+    } while (nextField == *lastTarget);
 
-    // Neues Feld auswürfeln (nicht das gleiche wie vorher)
-   // do {
-        *currentTarget = getRandomGenerator(minLimit, maxLimit);
-    //} while (*currentTarget == *lastTarget);
-    
-    *lastTarget = *currentTarget;
+    *currentTarget = nextField;
+    *lastTarget = nextField;
     leds.set_rgb(color, *currentTarget);
 }
-
 void runGameLogic(uint32_t currentTime) {
     switch (gameState) {
         
