@@ -10,19 +10,6 @@
     #include "MCP23017.h"
 #endif
 
-#define RED     0x00FF0000
-#define GREEN   0x0000FF00
-#define BLUE    0x000000FF
-#define YELLOW  0x00FFFF00
-#define CYAN    0x0000FFFF
-#define MAGENTA 0x00FF00FF
-#define ORANGE  0x00FFA500
-#define PURPLE  0x00800080
-#define WHITE   0x00FFFFFF
-#define GRAY    0x00AAAAAA
-#define OFF     0x00000000
-
-
 
 #ifdef USE_IO_EXPANDER
     MCP23017 expander0(0x20, IO_EXPANDER_0_IRQ_PIN);
