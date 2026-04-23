@@ -1,0 +1,23 @@
+#pragma once
+
+#include <Arduino.h>
+#include "MCP23017.h"
+#include "config.h"
+
+class IO_Expander
+{
+private:
+    const uint8_t num_io_exp;
+    std::vector<MCP23017*> io_exp;
+
+public:
+    IO_Expander(const uint8_t num_io_exp, const uint8_t* addresses, const uint8_t* irq_pins);
+    ~IO_Expander();
+    IO_Expander(const IO_Expander&) = delete;
+    IO_Expander& operator=(const IO_Expander&) = delete;
+
+    void init();
+    void read(volatile bool* isPressed, const uint8_t numFields) const;
+    bool readField(const uint8_t fieldIndex) const;
+    bool readPin(const uint8_t pin, const uint8_t expanderIndex) const;
+};

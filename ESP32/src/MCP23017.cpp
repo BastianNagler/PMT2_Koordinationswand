@@ -8,7 +8,7 @@ static void irqHandler(void* arg)
 }
 
 
-MCP23017::MCP23017(uint8_t i2cAddress, uint8_t interruptPin): 
+MCP23017::MCP23017(const uint8_t i2cAddress, const uint8_t interruptPin): 
     i2cAddress(i2cAddress), interruptPin(interruptPin)
 {}
 

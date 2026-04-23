@@ -22,14 +22,13 @@ class MCP23017
 private:
     const uint8_t i2cAddress;
     const uint8_t interruptPin;
+    
 
 public:
     volatile bool needsRead;
 
-    MCP23017(uint8_t i2cAddress, uint8_t interruptPin);
+    MCP23017(const uint8_t i2cAddress, const uint8_t interruptPin);
 
     void init();
     uint16_t read();
-
-protected:
 };
