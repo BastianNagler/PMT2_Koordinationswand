@@ -72,7 +72,7 @@ void set_next_target(uint8_t player) {
     uint8_t* lastTarget = (player == 1) ? &lastP1 : &lastP2;
     uint32_t color;
 
-    //do {
+    do {
         if (currentMode == SINGLE_PLAYER) {
             color = CYAN;
             nextField = getRandomGenerator(0, NUM_FIELDS);
@@ -97,7 +97,7 @@ void set_next_target(uint8_t player) {
             nextField = (randRow * NUM_COLUMNS) + randCol;
         }
         
-    //} while (nextField == *lastTarget);
+    } while (nextField == *lastTarget);
 
     *currentTarget = nextField;
     *lastTarget = nextField;
