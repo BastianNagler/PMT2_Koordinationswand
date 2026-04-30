@@ -19,7 +19,7 @@ Do not use GPIOs:
 // ---- DEVELOPMENT CONFIGURATION ----
 
 #define NUM_ROWS 1 // MAX 4
-#define NUM_COLUMNS 2
+#define NUM_COLUMNS 4
 
 #define NUM_FIELDS (NUM_ROWS * NUM_COLUMNS)
 
