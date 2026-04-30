@@ -38,7 +38,7 @@ Do not use GPIOs:
 
 // --- IO-Expander ---
 #define NUM_IO_EXPANDER 1
-#define NUM_IO_PER_EXPANDER 2
+#define NUM_IO_PER_EXPANDER 4
 #define I2C_SCL_PIN 41 // Change to actual pin
 #define I2C_SDA_PIN 40 // Change to actual pin
 #define IO_EXPANDER_ADDRESSES {0x20} // Change to actual addresses
