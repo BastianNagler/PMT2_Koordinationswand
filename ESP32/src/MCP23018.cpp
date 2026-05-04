@@ -16,10 +16,10 @@ void MCP23018::init()
 {
     // check if MCP23017 is connected
     Wire.beginTransmission(i2cAddress);
-    if (Wire.endTransmission())
+    while(Wire.endTransmission())
     {
         Serial.printf("MCP23017 (I2C-address 0x%02x) not found \n", i2cAddress);
-        while (1);
+        Wire.beginTransmission(i2cAddress);
     }
     Serial.printf("MCP23017 (I2C-address 0x%02x) successfully connected", i2cAddress);
 
