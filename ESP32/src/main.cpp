@@ -19,7 +19,6 @@ void setup()
 {
     Serial.begin(115200);
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
-    Wire1.begin(I2C_SCREEN_0, I2C_SCREEN_1, 200000);
 
     loadHighscores();
     expanders.init();

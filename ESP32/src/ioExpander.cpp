@@ -5,7 +5,7 @@ IO_Expander::IO_Expander(const uint8_t num_io_exp, const uint8_t* addresses, con
     io_exp.reserve(num_io_exp);
     for (uint8_t i = 0; i < num_io_exp; i++)
     {
-        io_exp.push_back(new MCP23017(addresses[i], irq_pins[i]));
+        io_exp.push_back(new MCP23018(addresses[i], irq_pins[i]));
     }
 }
 

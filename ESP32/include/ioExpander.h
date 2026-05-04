@@ -1,14 +1,14 @@
 #pragma once
 
 #include <Arduino.h>
-#include "MCP23017.h"
+#include "MCP23018.h"
 #include "config.h"
 
 class IO_Expander
 {
 private:
     const uint8_t num_io_exp;
-    std::vector<MCP23017*> io_exp;
+    std::vector<MCP23018*> io_exp;
 
 public:
     IO_Expander(const uint8_t num_io_exp, const uint8_t* addresses, const uint8_t* irq_pins);

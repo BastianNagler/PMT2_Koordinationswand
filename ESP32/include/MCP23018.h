@@ -17,7 +17,7 @@
 
 static void IRAM_ATTR irqHandler(void* arg);
 
-class MCP23017
+class MCP23018
 {
 private:
     const uint8_t i2cAddress;
@@ -27,7 +27,7 @@ private:
 public:
     volatile bool needsRead;
 
-    MCP23017(const uint8_t i2cAddress, const uint8_t interruptPin);
+    MCP23018(const uint8_t i2cAddress, const uint8_t interruptPin);
 
     void init();
     uint16_t read();

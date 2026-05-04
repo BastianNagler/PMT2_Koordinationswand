@@ -1,18 +1,18 @@
-#include "MCP23017.h"
+#include "MCP23018.h"
 
 static void irqHandler(void* arg)
 {
-    MCP23017* mcp = static_cast<MCP23017*>(arg);
+    MCP23018* mcp = static_cast<MCP23018*>(arg);
 
     mcp->needsRead = true;
 }
 
 
-MCP23017::MCP23017(const uint8_t i2cAddress, const uint8_t interruptPin): 
+MCP23018::MCP23018(const uint8_t i2cAddress, const uint8_t interruptPin): 
     i2cAddress(i2cAddress), interruptPin(interruptPin)
 {}
 
-void MCP23017::init()
+void MCP23018::init()
 {
     // check if MCP23017 is connected
     Wire.beginTransmission(i2cAddress);
@@ -55,7 +55,7 @@ void MCP23017::init()
     needsRead = true; // force initial read
 }
 
-uint16_t MCP23017::read()
+uint16_t MCP23018::read()
 {
     this->needsRead = false;
 
