@@ -17,21 +17,30 @@ IO_Expander::~IO_Expander()
     }
 }
 
-void IO_Expander::init()
+bool IO_Expander::init()
 {
+    bool success = true;
     for (uint8_t i = 0; i < num_io_exp; i++)
     {
-        io_exp[i]->init();
+        if (!io_exp[i]->init())
+        {
+            success = false;
+        }
     }
+    return success;
 }
 
-void IO_Expander::read(volatile bool* isPressed, const uint8_t numFields) const
+bool IO_Expander::read(volatile bool* isPressed, const uint8_t numFields)
 {
     for (uint8_t i = 0; i < num_io_exp; i++)
     {
         if (io_exp[i]->needsRead)
         {
-            uint16_t state = io_exp[i]->read();
+            uint16_t state;
+            if (!io_exp[i]->read(state))
+            {
+                return false;
+            }
             for (uint8_t j = 0; j < NUM_IO_PER_EXPANDER; j++)
             {
                 uint8_t fieldIndex = i * NUM_IO_PER_EXPANDER + j;
@@ -42,21 +51,5 @@ void IO_Expander::read(volatile bool* isPressed, const uint8_t numFields) const
             }
         }
     }
-}
-
-bool IO_Expander::readField(const uint8_t fieldIndex) const
-{
-    uint8_t expanderIndex = fieldIndex / NUM_IO_PER_EXPANDER;
-    uint8_t pinIndex = fieldIndex % NUM_IO_PER_EXPANDER;
-
-    return readPin(pinIndex, expanderIndex);
-}
-
-bool IO_Expander::readPin(const uint8_t pin, const uint8_t expanderIndex) const
-{
-    if (expanderIndex < num_io_exp)
-    {
-        return io_exp[expanderIndex]->read() & (1U << pin);
-    }
-    return false;
+    return true;
 }

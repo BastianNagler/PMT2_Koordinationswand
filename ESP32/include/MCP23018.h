@@ -3,17 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-/*
-    MCP23017-Config:
-        Normal Polarity
-        INTA and INTB coupled
-        Interrupt active high
-        Interrupt push-pull config
-        Interrupt when PIN isn't like previous value
-
-*/
-
-
+#define MAX_CONNECTION_ATTEMPTS 10
 
 static void IRAM_ATTR irqHandler(void* arg);
 
@@ -29,6 +19,6 @@ public:
 
     MCP23018(const uint8_t i2cAddress, const uint8_t interruptPin);
 
-    void init();
-    uint16_t read();
+    bool init();
+    bool read(uint16_t& data);
 };

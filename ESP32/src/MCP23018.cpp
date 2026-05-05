@@ -12,18 +12,30 @@ MCP23018::MCP23018(const uint8_t i2cAddress, const uint8_t interruptPin):
     i2cAddress(i2cAddress), interruptPin(interruptPin)
 {}
 
-void MCP23018::init()
+bool MCP23018::init()
 {
-    // check if MCP23017 is connected
+    uint8_t attempts = 0;
+    // check if MCP23018 is connected
     Wire.beginTransmission(i2cAddress);
-    while(Wire.endTransmission())
+    while(Wire.endTransmission() && attempts < MAX_CONNECTION_ATTEMPTS)
     {
-        Serial.printf("MCP23017 (I2C-address 0x%02x) not found \n", i2cAddress);
+        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Retrying... \n", i2cAddress);
+        delay(500);
         Wire.beginTransmission(i2cAddress);
+        attempts++;
     }
-    Serial.printf("MCP23017 (I2C-address 0x%02x) successfully connected", i2cAddress);
 
-    // configure MCP23017 internal registers
+    if(attempts >= MAX_CONNECTION_ATTEMPTS)
+    {
+        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Please fix issue");
+        return false;
+    }
+    else
+    {
+        Serial.printf("MCP23018 (I2C-address 0x%02x) successfully connected \n", i2cAddress);
+    }
+
+    // configure MCP23018 internal registers
     Wire.beginTransmission(i2cAddress);
     Wire.write(0x00); //starting Registry Address
     // IODIR: Set PINs to Input
@@ -53,9 +65,10 @@ void MCP23018::init()
     attachInterruptArg(digitalPinToInterrupt(interruptPin), irqHandler, this, RISING);
 
     needsRead = true; // force initial read
+    return true;
 }
 
-uint16_t MCP23018::read()
+bool MCP23018::read(uint16_t& data)
 {
     this->needsRead = false;
 
@@ -69,8 +82,10 @@ uint16_t MCP23018::read()
         uint8_t portA = Wire.read();
         uint8_t portB = Wire.read();
         
-        return (portB << 8) | portA; 
+        data = (portB << 8) | portA;
+        return true;
+    } else {
+        Serial.printf("I2C read error for MCP23018 (0x%02x): expected 2 bytes, got %d\n", i2cAddress, Wire.available());
+        return false;
     }
-
-    return 0;
 }

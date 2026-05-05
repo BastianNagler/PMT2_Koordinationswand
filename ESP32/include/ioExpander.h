@@ -16,8 +16,6 @@ public:
     IO_Expander(const IO_Expander&) = delete;
     IO_Expander& operator=(const IO_Expander&) = delete;
 
-    void init();
-    void read(volatile bool* isPressed, const uint8_t numFields) const;
-    bool readField(const uint8_t fieldIndex) const;
-    bool readPin(const uint8_t pin, const uint8_t expanderIndex) const;
+    bool init();
+    bool read(volatile bool* isPressed, const uint8_t numFields);
 };
