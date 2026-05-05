@@ -18,6 +18,10 @@ void LED_Driver::init()
         FastLED.addLeds<WS2812B, LED_DRIVER_3_PIN, GRB>((CRGB*)physical_frame_buffer[3], NUM_COLUMNS * NUM_LEDS_PER_FIELD);
     #endif
 
+    //pull the LED_DATA_EN pin low
+    pinMode(2, OUTPUT);
+    digitalWrite(2, 0);
+
     FastLED.setBrightness(MAX_BRIGHTNESS);
     FastLED.clear();
 }
