@@ -13,6 +13,7 @@ uint8_t targetP1 = 99;
 uint8_t targetP2 = 99;
 uint8_t lastP1 = 99;
 uint8_t lastP2 = 99;
+uint32_t cooldownStartTime = 0;
 
 uint32_t gameStartTime = 0;
 
@@ -74,7 +75,7 @@ void set_next_target(uint8_t player) {
 
     do {
         if (currentMode == SINGLE_PLAYER) {
-            color = CYAN;
+            color = PURPLE;
             nextField = getRandomGenerator(0, NUM_FIELDS);
         } 
         else {
@@ -109,8 +110,8 @@ void runGameLogic(uint32_t currentTime) {
         case IDLE:
             for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
             if ((currentTime / 500) % 2 == 0) {
-                    leds.set_rgb(YELLOW, 0); // Taste für 1-Spieler
-                    leds.set_rgb(BLUE, 1);   // Taste für 2-Spieler
+                    leds.set_rgb(GREEN, 0); // Taste für 1-Spieler
+                    leds.set_rgb(MAGENTA, 1);   // Taste für 2-Spieler
                 }
 
             // Startbedingung prüfen
@@ -139,6 +140,11 @@ void runGameLogic(uint32_t currentTime) {
             break;
 
         case PLAYING:
+            //Vorzeitiger Abbruch, wenn Box 1 bis 4 (Indizes 0 bis 3) gleichzeitig gedrückt werden
+            if (isPressed[0] && isPressed[1] && isPressed[2] && isPressed[3]) {
+                Serial.println("Spiel vorzeitig abgebrochen!");
+                gameState = GAME_OVER;
+            }
             if (currentTime - gameStartTime >= 60000) {
                 // Zeit abgelaufen!
                 gameState = GAME_OVER;
@@ -164,15 +170,29 @@ void runGameLogic(uint32_t currentTime) {
         case GAME_OVER:
             if (currentMode == SINGLE_PLAYER) {
                 Serial.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
-
             } else {
                 Serial.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
                 checkAndAddHighscore(scoreP2);
             }
             checkAndAddHighscore(scoreP1);
-            for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i); 
+            
+            // Alle LEDs auf Lila/Magenta schalten, um das Spielende zu signalisieren
+            for (int i = 0; i < NUM_FIELDS; i++) {
+                leds.set_rgb(MAGENTA, i); 
+            } 
              
-            gameState = IDLE;            
+            cooldownStartTime = currentTime; // Startzeitpunkt für die 10 Sekunden Pause merken
+            gameState = COOLDOWN;            // In den neuen Cooldown-Status wechseln
+            break;
+
+        case COOLDOWN:
+            if (currentTime - cooldownStartTime >= 5000) {
+                // LEDs wieder ausschalten
+                for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
+                
+                // Zurück in den Startbildschirm
+                gameState = IDLE; 
+            }
             break;
     }
 }

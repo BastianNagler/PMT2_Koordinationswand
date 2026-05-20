@@ -19,7 +19,7 @@
 #define OFF     0x00000000
 
 // --- Enums ---
-enum GameState { IDLE, PLAYING, GAME_OVER };
+enum GameState { IDLE, PLAYING, GAME_OVER, COOLDOWN };
 enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
 // --- Externe Variablen (werden im Hauptprogramm definiert) ---
