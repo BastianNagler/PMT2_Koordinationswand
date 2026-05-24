@@ -3,6 +3,13 @@
 Preferences preferences;
 uint8_t highscores[10] = {0,0,0,0,0,0,0,0,0,0};
 
+// --- Farbkonfiguration ---
+// Diese Farben kannst du hier nach Belieben anpassen (Voraussetzung: Deine Farb-Makros wie PURPLE etc. existieren).
+const uint32_t COLOR_SINGLE_PLAYER = GREEN;    // Single Player (für IDLE und im Spiel)
+const uint32_t COLOR_MULTIPLAYER_IDLE = BLUE;  // Multiplayer (nur für den Start-Button im IDLE)
+const uint32_t COLOR_P1 = MAGENTA;             // Player 1 (im Spiel und Gewinner-Screen)
+const uint32_t COLOR_P2 = ORANGE;              // Player 2 (im Spiel und Gewinner-Screen)
+
 // --- Variablen für die State Machine initialisieren ---
 GameState gameState = IDLE;
 GameMode currentMode = SINGLE_PLAYER;
@@ -75,11 +82,11 @@ void set_next_target(uint8_t player) {
 
     do {
         if (currentMode == SINGLE_PLAYER) {
-            color = PURPLE;
+            color = COLOR_SINGLE_PLAYER; // Dynamische Variable genutzt
             nextField = getRandomGenerator(0, NUM_FIELDS);
         } 
         else {
-            color = (player == 1) ? MAGENTA : ORANGE;
+            color = (player == 1) ? COLOR_P1 : COLOR_P2; // Dynamische Variablen genutzt
             
             // 1. Beliebige Zeile auswürfeln (0 bis NUM_ROWS-1)
             uint8_t randRow = getRandomGenerator(0, NUM_ROWS); 
@@ -104,14 +111,15 @@ void set_next_target(uint8_t player) {
     *lastTarget = nextField;
     leds.set_rgb(color, *currentTarget);
 }
+
 void runGameLogic(uint32_t currentTime) {
     switch (gameState) {
         
         case IDLE:
             for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
             if ((currentTime / 500) % 2 == 0) {
-                    leds.set_rgb(GREEN, 0); // Taste für 1-Spieler
-                    leds.set_rgb(MAGENTA, 1);   // Taste für 2-Spieler
+                    leds.set_rgb(COLOR_SINGLE_PLAYER, 0);   // Taste für 1-Spieler
+                    leds.set_rgb(COLOR_MULTIPLAYER_IDLE, 1); // Taste für 2-Spieler
                 }
 
             // Startbedingung prüfen
@@ -170,19 +178,50 @@ void runGameLogic(uint32_t currentTime) {
         case GAME_OVER:
             if (currentMode == SINGLE_PLAYER) {
                 Serial.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
+                checkAndAddHighscore(scoreP1);
+                
+                // Das gesamte Feld in der Single Player Farbe leuchten lassen
+                for (int i = 0; i < NUM_FIELDS; i++) {
+                    leds.set_rgb(COLOR_SINGLE_PLAYER, i); 
+                } 
             } else {
                 Serial.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
                 checkAndAddHighscore(scoreP2);
+                checkAndAddHighscore(scoreP1);
+                
+                // Multiplayer: Siegerfeld aufleuchten lassen
+                for (int i = 0; i < NUM_FIELDS; i++) {
+                    // Wir errechnen die Spalte anhand des 1D-Index i
+                    // Annahme: Felder sind zeilenweise von links nach rechts durchnummeriert
+                    uint8_t col = i % NUM_COLUMNS; 
+                    
+                    if (scoreP1 > scoreP2) {
+                        // Player 1 hat gewonnen
+                        if (col < NUM_COLUMNS / 2) {
+                            leds.set_rgb(COLOR_P1, i); // Linke Hälfte
+                        } else {
+                            leds.set_rgb(OFF, i);      // Rechte Hälfte bleibt aus
+                        }
+                    } else if (scoreP2 > scoreP1) {
+                        // Player 2 hat gewonnen
+                        if (col >= NUM_COLUMNS / 2) {
+                            leds.set_rgb(COLOR_P2, i); // Rechte Hälfte
+                        } else {
+                            leds.set_rgb(OFF, i);      // Linke Hälfte bleibt aus
+                        }
+                    } else {
+                        // Unentschieden: Jeder behält seine Seite in seiner Farbe
+                        if (col < NUM_COLUMNS / 2) {
+                            leds.set_rgb(COLOR_P1, i); 
+                        } else {
+                            leds.set_rgb(COLOR_P2, i);
+                        }
+                    }
+                }
             }
-            checkAndAddHighscore(scoreP1);
-            
-            // Alle LEDs auf Lila/Magenta schalten, um das Spielende zu signalisieren
-            for (int i = 0; i < NUM_FIELDS; i++) {
-                leds.set_rgb(MAGENTA, i); 
-            } 
              
-            cooldownStartTime = currentTime; // Startzeitpunkt für die 10 Sekunden Pause merken
-            gameState = COOLDOWN;            // In den neuen Cooldown-Status wechseln
+            cooldownStartTime = currentTime; // Startzeitpunkt für die 5 Sekunden Pause merken
+            gameState = COOLDOWN;            // In den Cooldown-Status wechseln
             break;
 
         case COOLDOWN:
