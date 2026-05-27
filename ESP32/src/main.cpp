@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <esp_timer.h>
+#include <esp_task_wdt.h>
 
 #include "TwallGame.h"
 #include "config.h"
@@ -30,7 +31,16 @@ extern GameMode currentMode;
 void setup()
 {
     Serial.begin(115200);
+
+    esp_task_wdt_config_t twdt_config = {
+        .timeout_ms = 3 * 1000,
+        .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,    
+        .trigger_panic = true, // true = ESP führt bei Timeout einen Reset durch
+    };
+    esp_task_wdt_init(&twdt_config);
+
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
+    Wire.setTimeOut(100);
 
     loadHighscores();
     
@@ -80,4 +90,5 @@ void loop()
     
     leds.show();
     heartbeat.update();
+    esp_task_wdt_reset();
 }
