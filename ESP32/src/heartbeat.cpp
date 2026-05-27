@@ -1,5 +1,4 @@
 #include "heartbeat.h"
-#include <cmath> // Für sin()
 
 void HeartbeatLED::init()
 {
@@ -10,10 +9,7 @@ void HeartbeatLED::init()
 
 void HeartbeatLED::update()
 {
-    uint32_t currentTime = millis();
-    // Sinusverlauf: Periode ca. 2 Sekunden (2*PI / 0.00314 ≈ 2000ms)
-    float angle = currentTime * 0.00314f; // Skaliere für Periode
-    uint8_t brightness = (sin(angle) + 1.0f) * 127.5f; // 0-255
+    uint8_t brightness = beatsin8(30); // 30 BPM ≈ 2 Sekunden Periode
 
     if (hasError)
     {

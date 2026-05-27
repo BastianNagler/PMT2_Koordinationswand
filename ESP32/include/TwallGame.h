@@ -19,7 +19,7 @@
 #define OFF     0x00000000
 
 // --- Enums ---
-enum GameState { IDLE, PLAYING, GAME_OVER, COOLDOWN };
+enum GameState { IDLE, PLAYING, RIPPLE_ANIM, GAME_OVER, COOLDOWN };
 enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
 // --- Externe Variablen (werden im Hauptprogramm definiert) ---
@@ -48,3 +48,10 @@ void checkAndAddHighscore(uint8_t newScore);
 uint8_t getRandomGenerator(uint8_t min, uint8_t max);
 void set_next_target(uint8_t player);
 void runGameLogic(uint32_t currentTime);
+void handleIdleState(uint32_t currentTime);
+void handlePlayingState(uint32_t currentTime);
+void handleRippleAnimState(uint32_t currentTime);
+void handleGameOverState(uint32_t currentTime);
+void handleCooldownState(uint32_t currentTime);
+bool isGameAbortRequested();
+void displayWinnerScreen();

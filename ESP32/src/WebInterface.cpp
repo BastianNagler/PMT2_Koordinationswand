@@ -18,13 +18,11 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
     if (type == WS_EVT_DATA) {
         AwsFrameInfo *info = (AwsFrameInfo*)arg;
         if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-            data[len] = 0; // Null-Terminator
-            String message = (char*)data;
-            Serial.printf("WebSocket empfangen: %s\n", message.c_str());
+            Serial.printf("WebSocket empfangen (Länge: %u)\n", len);
             
             // JSON auspacken
             JsonDocument doc;
-            DeserializationError error = deserializeJson(doc, message);
+            DeserializationError error = deserializeJson(doc, data, len); // Verwendet Pointer und Länge direkt
             
             if (!error) {
                 // Wenn das Tablet einen neuen Namen schickt
