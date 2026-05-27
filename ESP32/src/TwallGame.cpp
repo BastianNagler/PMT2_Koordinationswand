@@ -1,7 +1,6 @@
 #include "TwallGame.h"
 
 Preferences preferences;
-uint8_t highscores[10] = {0,0,0,0,0,0,0,0,0,0};
 
 // --- Farbkonfiguration ---
 // Diese Farben kannst du hier nach Belieben anpassen (Voraussetzung: Deine Farb-Makros wie PURPLE etc. existieren).
@@ -24,29 +23,48 @@ uint32_t cooldownStartTime = 0;
 
 uint32_t gameStartTime = 0;
 
+#include <string.h> // Für strncpy
+
+HighscoreEntry highscores[10];
+int8_t lastNewHighscoreIndex = -1; // -1 bedeutet: aktuell kein neuer Highscore zur Benennung offen
+
 void loadHighscores() {
-    preferences.begin("game-data", false); // Ordner "game-data" öffnen
-    // Versuche das Array zu lesen. Wenn nicht vorhanden, bleibt es bei 0.
-    preferences.getBytes("top10", highscores, 10);
+    preferences.begin("game-data", false);
+    
+    // Prüfen, ob schon Daten existieren, sonst mit 0 und leeren Namen initialisieren
+    size_t len = preferences.getBytesLength("top10_v2"); 
+    if (len == sizeof(highscores)) {
+        preferences.getBytes("top10_v2", &highscores, sizeof(highscores));
+        Serial.println("Highscores geladen.");
+    } else {
+        Serial.println("Keine gültigen Highscores gefunden, initialisiere neu...");
+        for (int i = 0; i < 10; i++) {
+            highscores[i].score = 0;
+            strncpy(highscores[i].name, "---", MAX_NAME_LEN);
+        }
+    }
     preferences.end();
     
-    Serial.println("Highscores geladen:");
-    for(int i=0; i<10; i++) Serial.printf("%d. %d\n", i+1, highscores[i]);
+    for(int i=0; i<10; i++) {
+        Serial.printf("%d. %s: %d\n", i+1, highscores[i].name, highscores[i].score);
+    }
 }
 
 void saveHighscores() {
     preferences.begin("game-data", false);
-    preferences.putBytes("top10", highscores, 10);
+    preferences.putBytes("top10_v2", &highscores, sizeof(highscores)); // "top10_v2" damit wir das alte Format nicht crashen
     preferences.end();
 }
 
 void checkAndAddHighscore(uint8_t newScore) {
-    if (newScore <= highscores[9]) return; // Nicht gut genug für Top 10
+    lastNewHighscoreIndex = -1; // Reset
+    
+    if (newScore <= highscores[9].score) return; // Nicht gut genug für Top 10
 
     // Platz finden
     int insertPos = 9;
     for (int i = 0; i < 10; i++) {
-        if (newScore > highscores[i]) {
+        if (newScore > highscores[i].score) {
             insertPos = i;
             break;
         }
@@ -57,12 +75,28 @@ void checkAndAddHighscore(uint8_t newScore) {
         highscores[i] = highscores[i-1];
     }
 
-    // Neuen Score einfügen
-    highscores[insertPos] = newScore;
+    // Neuen Score einfügen und Standardnamen setzen
+    highscores[insertPos].score = newScore;
+    strncpy(highscores[insertPos].name, "TrageDeinenNamenein!", MAX_NAME_LEN);
     
-    // Speichern
+    // Merken, wo wir eingefügt haben, damit das Webinterface ihn später überschreiben kann
+    lastNewHighscoreIndex = insertPos;
+    
     saveHighscores();
-    Serial.println("Neuer Highscore gespeichert!");
+    Serial.printf("Neuer Highscore auf Platz %d gespeichert!\n", insertPos + 1);
+}
+
+// Diese Funktion rufen wir später auf, wenn das Webinterface den Namen schickt
+void updateLastHighscoreName(const char* newName) {
+    if (lastNewHighscoreIndex >= 0 && lastNewHighscoreIndex < 10) {
+        strncpy(highscores[lastNewHighscoreIndex].name, newName, MAX_NAME_LEN - 1);
+        highscores[lastNewHighscoreIndex].name[MAX_NAME_LEN - 1] = '\0'; // Sicherheitshalber terminieren
+        saveHighscores();
+        Serial.printf("Name für Platz %d aktualisiert: %s\n", lastNewHighscoreIndex + 1, newName);
+        
+        // Optional: Reset des Index, falls man den Namen nur einmal ändern darf
+        // lastNewHighscoreIndex = -1; 
+    }
 }
 
 uint8_t getRandomGenerator(uint8_t min, uint8_t max){

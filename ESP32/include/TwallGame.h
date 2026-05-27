@@ -30,9 +30,19 @@ extern LED_Driver leds;
 extern GameState gameState;
 extern GameMode currentMode;
 
-// --- Highscore Variablen ---
-extern uint8_t highscores[10];
+// Maximale Länge für den Spielernamen (inkl. Null-Terminator)
+#define MAX_NAME_LEN 16 
+
+struct HighscoreEntry {
+    uint8_t score;
+    char name[MAX_NAME_LEN];
+};
+
+extern HighscoreEntry highscores[10];
+extern int8_t lastNewHighscoreIndex; 
+void updateLastHighscoreName(const char* newName);
 void loadHighscores();
+void saveHighscores();
 void checkAndAddHighscore(uint8_t newScore);
 // --- Funktions-Prototypen ---
 uint8_t getRandomGenerator(uint8_t min, uint8_t max);

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T-Wall</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+</head>
+<body>
+
+    <h1 class="heading">T-Wall</h1>
+
+    <div class="container" id="endofgamescreen" style="display: flex">
+
+        <div class="left-section">
+            <div class="highscores">
+                <h2>Highscores</h2>
+                <div id="highscoreDisplay" class="highscore-list">
+                    Warte auf ESP32...
+                </div>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="player-panel">
+
+                <div class="field">
+                    <label>Letztes Spiel:</label>
+                    <div class="box" id="finalScoreDisplay">Noch kein Spiel gespielt</div>
+                </div>
+
+                <div class="field" id="nameInputSection" style="display: none; margin-top: 20px;">
+                    <label style="color: #d9534f; font-weight: bold; font-size: 16px;">NEUER HIGHSCORE!</label>
+                    <form onsubmit="handlePlayerNameForm(event)">
+                        <input type="text" id="playerNameInput" class="box" placeholder="Dein Name" maxlength="15" required style="border-color: #d9534f; outline: none;">
+                        <button type="submit" class="btn primary" style="width: 100%; margin-top: 10px;">Namen speichern</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="container" id="gamescreen" style="display: none; flex-direction: column; align-items: center; justify-content: center;">
+
+        <div style="font-size: 32px; font-weight: 800; margin-bottom: 20px;">
+            Zeit: <span id="timerValue" style="color: #d9534f;">60</span>s
+        </div>
+
+        <div style="display: flex; width: 100%; justify-content: space-around;">
+            
+            <div class="score">
+                <h2 id="p1Label">Score</h2>
+                <div class="points" id="scoreP1">0</div>
+            </div>
+
+            <div class="score" id="p2Section" style="display: none;">
+                <h2>Player 2</h2>
+                <div class="points" id="scoreP2">0</div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
