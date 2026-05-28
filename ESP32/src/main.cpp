@@ -35,13 +35,6 @@ void setup()
 {
     Serial.begin(115200);
 
-    esp_task_wdt_config_t twdt_config = {
-        .timeout_ms = 3 * 1000,
-        .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,    
-        .trigger_panic = true,
-    };
-    esp_task_wdt_init(&twdt_config);
-
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
     Wire.setTimeOut(100);
 
@@ -54,7 +47,7 @@ void setup()
     
     initWebInterface();
 
-    xTaskCreate(inputTask, "Input Task", 2048, NULL, 5, NULL);
+    xTaskCreate(inputTask, "Input Task", 4096, NULL, 5, NULL);
     xTaskCreate(gameAndWebTask, "Game/Web Task", 4096, NULL, 3, NULL);
     xTaskCreate(ledAndHeartbeatTask, "LED Task", 2048, NULL, 2, NULL);
     vTaskDelete(NULL);
@@ -79,6 +72,7 @@ void inputTask(void *pvParameters)
  */
 void gameAndWebTask(void *pvParameters) 
 {
+    esp_task_wdt_add(NULL);
     while (1) {
         runGameLogic(millis());
 
