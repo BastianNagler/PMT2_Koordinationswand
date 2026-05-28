@@ -10,17 +10,10 @@
 #include "heartbeat.h"
 #include "WebInterface.h"
 
-const uint8_t io_exp_irq_pins[NUM_IO_EXPANDER] = IO_EXPANDER_IRQ_PINS;
-const uint8_t io_exp_addresses[NUM_IO_EXPANDER] = IO_EXPANDER_ADDRESSES;
 
-IO_Expander expanders(NUM_IO_EXPANDER, io_exp_addresses, io_exp_irq_pins);
 volatile bool isPressed[NUM_FIELDS];
 LED_Driver leds;
 HeartbeatLED heartbeat;
-
-GameState lastGameState = IDLE;
-uint8_t lastScoreP1 = 0;
-uint8_t lastScoreP2 = 0;
 
 extern uint8_t scoreP1;
 extern uint8_t scoreP2;
@@ -28,8 +21,11 @@ extern GameState gameState;
 extern GameMode currentMode;
 
 void inputTask(void *pvParameters);
-void gameAndWebTask(void *pvParameters);
-void ledAndHeartbeatTask(void *pvParameters);
+void gameTask(void *pvParameters);
+void watchdogTask(void *pvParameters);
+void webTask(void *pvParameters);
+void ledTask(void *pvParameters);
+void heartbeatTask(void *pvParameters);
 
 void setup()
 {
@@ -38,45 +34,74 @@ void setup()
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
     Wire.setTimeOut(100);
 
-    loadHighscores();
-    
-    if (!expanders.init()) { heartbeat.setError(); }
-    
-    leds.init();
-    heartbeat.init();
-    
-    initWebInterface();
-
-    xTaskCreate(inputTask, "Input Task", 4096, NULL, 5, NULL);
-    xTaskCreate(gameAndWebTask, "Game/Web Task", 4096, NULL, 3, NULL);
-    xTaskCreate(ledAndHeartbeatTask, "LED Task", 2048, NULL, 2, NULL);
+    xTaskCreate(inputTask, "Input Task", 4096, NULL, 4, NULL);
+    xTaskCreate(gameTask, "Game Task", 4096, NULL, 3, NULL);
+    xTaskCreate(ledTask, "LED Task", 4096, NULL, 2, NULL);
+    xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
+    xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
     vTaskDelete(NULL);
 }
 
-/**
- * @brief Task for handling hardware inputs. High priority to ensure responsiveness.
- */
+/// @brief Task for handling hardware inputs. High priority to ensure responsiveness.
 void inputTask(void *pvParameters) 
 {
-    while (1) {
-        if (!expanders.read(isPressed, NUM_FIELDS)) {
-            heartbeat.setError();
-        }
-        vTaskDelay(pdMS_TO_TICKS(20));
+    // esp_task_wdt_add(NULL);
+
+    static const uint8_t io_exp_irq_pins[NUM_IO_EXPANDER] = IO_EXPANDER_IRQ_PINS;
+    static const uint8_t io_exp_addresses[NUM_IO_EXPANDER] = IO_EXPANDER_ADDRESSES;
+    static IO_Expander expanders(NUM_IO_EXPANDER, io_exp_addresses, io_exp_irq_pins);
+
+    if (!expanders.init())
+    { 
+        heartbeat.setError();
     }
 
+    while (1) {
+        if (!expanders.read(isPressed, NUM_FIELDS))
+        {
+            heartbeat.setError();
+        }
+
+        // esp_task_wdt_reset();
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
 }
 
-/**
- * @brief Task for running the main game logic and sending web updates.
- */
-void gameAndWebTask(void *pvParameters) 
+/// @brief Task for running game logic 
+void gameTask(void *pvParameters)
 {
     esp_task_wdt_add(NULL);
-    while (1) {
+    loadHighscores();
+    while(1)
+    {
         runGameLogic(millis());
 
-        // --- 1. Check for status-change (Start / End) ---
+        esp_task_wdt_reset();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+/// @brief Task for feeding the Watchdog.
+void watchdogTask(void *pvParameters) 
+{
+    
+    while (1) {
+        
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+/// @brief Task for running Web-Server 
+void webTask(void *pvParameters)
+{
+    static GameState lastGameState = IDLE;
+    static uint8_t lastScoreP1 = 0;
+    static uint8_t lastScoreP2 = 0;
+
+    initWebInterface();
+    while(1)
+    {
+    // --- 1. Check for status-change (Start / End) ---
         if (gameState != lastGameState) {
             if (gameState == PLAYING) {
                 notifyGameStart(currentMode == SINGLE_PLAYER ? "single" : "multi");
@@ -97,20 +122,32 @@ void gameAndWebTask(void *pvParameters)
             }
         }
 
-        esp_task_wdt_reset(); // Reset watchdog in the main logic task
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
-/**
- * @brief Task for updating the LED strip and heartbeat. Low priority.
- */
-void ledAndHeartbeatTask(void *pvParameters) 
+/// @brief Task for updating the LEDs
+void ledTask(void *pvParameters) 
 {
-    while (1) {
+    esp_task_wdt_add(NULL);
+    leds.init();
+    while (1)
+    {
         leds.show();
-        heartbeat.update();
+
+        esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(16));
+    }
+}
+
+/// @brief Task for updating the Heartbeat-LED 
+void heartbeatTask(void *pvParameters)
+{
+    heartbeat.init();
+    while(1)
+    {
+        heartbeat.update();
+        vTaskDelay(pdMS_TO_TICKS(30));
     }
 }
 
