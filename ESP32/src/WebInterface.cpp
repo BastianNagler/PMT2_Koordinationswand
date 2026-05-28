@@ -7,6 +7,8 @@
 
 #include "TwallGame.h" // Wichtig für Zugriff auf Highscores und updateLastHighscoreName
 
+extern TwallGame gameInstance;
+
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
@@ -28,7 +30,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
                 // Wenn das Tablet einen neuen Namen schickt
                 if (doc["action"] == "set name") {
                     const char* newName = doc["playerName"];
-                    updateLastHighscoreName(newName);
+                    gameInstance.updateLastHighscoreName(newName);
                     
                     // Schicke direkt die aktualisierte Highscore-Liste an alle zurück
                     notifyGameOver(); 
@@ -90,6 +92,8 @@ void notifyGameOver() {
     JsonDocument doc;
     doc["action"] = "end of game";
     
+    const HighscoreEntry* highscores = gameInstance.getHighscores();
+
     // Highscores Array dynamisch aufbauen
     JsonArray hsArray = doc["highscoreList"].to<JsonArray>();
     for(int i=0; i<10; i++) {

@@ -14,11 +14,8 @@
 volatile bool isPressed[NUM_FIELDS];
 LED_Driver leds;
 HeartbeatLED heartbeat;
+TwallGame gameInstance(isPressed, leds);
 
-extern uint8_t scoreP1;
-extern uint8_t scoreP2;
-extern GameState gameState;
-extern GameMode currentMode;
 
 void inputTask(void *pvParameters);
 void gameTask(void *pvParameters);
@@ -70,10 +67,12 @@ void inputTask(void *pvParameters)
 void gameTask(void *pvParameters)
 {
     esp_task_wdt_add(NULL);
-    loadHighscores();
+    
+    gameInstance.init();
+
     while(1)
     {
-        runGameLogic(millis());
+        gameInstance.run(millis());
 
         esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -90,20 +89,25 @@ void webTask(void *pvParameters)
     initWebInterface();
     while(1)
     {
-    // --- 1. Check for status-change (Start / End) ---
-        if (gameState != lastGameState) {
-            if (gameState == PLAYING) {
+        GameState currentState = gameInstance.getGameState();
+        GameMode currentMode = gameInstance.getGameMode();
+        uint8_t scoreP1 = gameInstance.getScoreP1();
+        uint8_t scoreP2 = gameInstance.getScoreP2();
+        
+        // --- 1. Check for status-change (Start / End) ---
+        if (currentState != lastGameState) {
+            if (currentState == PLAYING) {
                 notifyGameStart(currentMode == SINGLE_PLAYER ? "single" : "multi");
                 lastScoreP1 = 0;
                 lastScoreP2 = 0;
-            } else if (gameState == GAME_OVER) {
+            } else if (currentState == GAME_OVER) {
                 notifyGameOver();
             }
-            lastGameState = gameState;
+            lastGameState = currentState;
         }
 
         // --- 2. Check for score updates ---
-        if (gameState == PLAYING) {
+        if (currentState == PLAYING) {
             if (scoreP1 != lastScoreP1 || scoreP2 != lastScoreP2) {
                 updateScore(scoreP1, scoreP2);
                 lastScoreP1 = scoreP1;
