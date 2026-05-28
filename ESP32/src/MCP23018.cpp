@@ -14,18 +14,9 @@ MCP23018::MCP23018(const uint8_t i2cAddress, const uint8_t interruptPin):
 
 bool MCP23018::init()
 {
-    uint8_t attempts = 0;
     // check if MCP23018 is connected
     Wire.beginTransmission(i2cAddress);
-    while(Wire.endTransmission() && attempts < MAX_CONNECTION_ATTEMPTS)
-    {
-        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Retrying... \n", i2cAddress);
-        delay(500);
-        Wire.beginTransmission(i2cAddress);
-        attempts++;
-    }
-
-    if(attempts >= MAX_CONNECTION_ATTEMPTS)
+    if(Wire.endTransmission())
     {
         Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Please fix issue");
         return false;

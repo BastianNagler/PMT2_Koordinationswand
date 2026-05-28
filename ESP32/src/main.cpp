@@ -45,14 +45,14 @@ void setup()
 /// @brief Task for handling hardware inputs. High priority to ensure responsiveness.
 void inputTask(void *pvParameters) 
 {
-    // esp_task_wdt_add(NULL);
+    esp_task_wdt_add(NULL);
 
     static const uint8_t io_exp_irq_pins[NUM_IO_EXPANDER] = IO_EXPANDER_IRQ_PINS;
     static const uint8_t io_exp_addresses[NUM_IO_EXPANDER] = IO_EXPANDER_ADDRESSES;
     static IO_Expander expanders(NUM_IO_EXPANDER, io_exp_addresses, io_exp_irq_pins);
 
     if (!expanders.init())
-    { 
+    {
         heartbeat.setError();
     }
 
@@ -62,7 +62,7 @@ void inputTask(void *pvParameters)
             heartbeat.setError();
         }
 
-        // esp_task_wdt_reset();
+        esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
