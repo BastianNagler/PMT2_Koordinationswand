@@ -2,7 +2,7 @@
 
 void HeartbeatLED::init()
 {
-    FastLED.addLeds<WS2812B, HEARTBEAT_LED_PIN, GRB>(&led, 1);
+    controller = &FastLED.addLeds<WS2812B, HEARTBEAT_LED_PIN, GRB>(&led, 1);
     led = CRGB::Black;
     FastLED.show();
 }
@@ -19,7 +19,7 @@ void HeartbeatLED::update()
     {
         led = CRGB(0, brightness, 0); // Grün pulsieren
     }
-    FastLED.show();
+    controller->showLeds(0xFF);
 }
 
 void HeartbeatLED::setError()

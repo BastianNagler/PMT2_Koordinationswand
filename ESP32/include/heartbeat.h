@@ -14,6 +14,7 @@ class HeartbeatLED
 private:
     CRGB led;
     bool hasError = false;
+    CLEDController* controller;
 
 public:
     /// @brief Initializes the Heartbeat LED
