@@ -22,7 +22,6 @@ extern GameMode currentMode;
 
 void inputTask(void *pvParameters);
 void gameTask(void *pvParameters);
-void watchdogTask(void *pvParameters);
 void webTask(void *pvParameters);
 void ledTask(void *pvParameters);
 void heartbeatTask(void *pvParameters);
@@ -77,16 +76,6 @@ void gameTask(void *pvParameters)
         runGameLogic(millis());
 
         esp_task_wdt_reset();
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
-}
-
-/// @brief Task for feeding the Watchdog.
-void watchdogTask(void *pvParameters) 
-{
-    
-    while (1) {
-        
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
