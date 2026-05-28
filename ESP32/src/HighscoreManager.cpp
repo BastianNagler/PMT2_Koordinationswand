@@ -20,7 +20,7 @@ void HighscoreManager::load() {
         Serial.println("Keine Highscore-Datei gefunden, initialisiere neu...");
         for (int i = 0; i < 10; i++) {
             highscores[i].score = 0;
-            strncpy(highscores[i].name, "---", MAX_NAME_LEN);
+            strlcpy(highscores[i].name, "---", MAX_NAME_LEN);
         }
     }
     
@@ -60,7 +60,7 @@ void HighscoreManager::checkAndAdd(uint8_t newScore) {
 
     // Neuen Score einfügen und Standardnamen setzen
     highscores[insertPos].score = newScore;
-    strncpy(highscores[insertPos].name, HIGHSCORE_PLACEHOLDER_NAME, MAX_NAME_LEN);
+    strlcpy(highscores[insertPos].name, HIGHSCORE_PLACEHOLDER_NAME, MAX_NAME_LEN);
     
     // Merken, wo wir eingefügt haben, damit das Webinterface ihn später überschreiben kann
     lastNewHighscoreIndex = insertPos;
@@ -71,8 +71,7 @@ void HighscoreManager::checkAndAdd(uint8_t newScore) {
 
 void HighscoreManager::updateLastHighscoreName(const char* newName) {
     if (lastNewHighscoreIndex >= 0 && lastNewHighscoreIndex < 10) {
-        strncpy(highscores[lastNewHighscoreIndex].name, newName, MAX_NAME_LEN - 1);
-        highscores[lastNewHighscoreIndex].name[MAX_NAME_LEN - 1] = '\0'; // Sicherheitshalber terminieren
+        strlcpy(highscores[lastNewHighscoreIndex].name, newName, MAX_NAME_LEN);
         save();
         Serial.printf("Name für Platz %d aktualisiert: %s\n", lastNewHighscoreIndex + 1, newName);
     }
