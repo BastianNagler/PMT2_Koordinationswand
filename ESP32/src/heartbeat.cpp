@@ -4,7 +4,7 @@ void HeartbeatLED::init()
 {
     controller = &FastLED.addLeds<WS2812B, HEARTBEAT_LED_PIN, GRB>(&led, 1);
     led = CRGB::Black;
-    FastLED.show();
+    controller->showLeds(0xFF);
 }
 
 void HeartbeatLED::update()
