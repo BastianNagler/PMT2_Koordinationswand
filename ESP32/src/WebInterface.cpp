@@ -15,6 +15,10 @@ AsyncWebSocket ws("/ws");
 const char* ssid = "T-Wall";
 const char* password = "twallpassword"; // Muss mind. 8 Zeichen lang sein
 
+const IPAddress localIP(192, 168, 1, 1);
+const IPAddress localGW(192, 168, 1, 1);
+const IPAddress localSN(255, 255, 255, 0);
+
 // --- Empfangen von Nachrichten vom Browser ---
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
     if (type == WS_EVT_DATA) {
@@ -48,6 +52,8 @@ void initWebInterface() {
         return;
     }
     
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(localIP, localGW, localSN);
     WiFi.softAP(ssid, password);
     Serial.print("WLAN Access Point gestartet. IP-Adresse: ");
     Serial.println(WiFi.softAPIP());
