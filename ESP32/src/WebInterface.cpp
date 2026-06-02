@@ -5,15 +5,15 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 
-#include "TwallGame.h" // Wichtig für Zugriff auf Highscores und updateLastHighscoreName
+#include "GameLogic.h" // Wichtig für Zugriff auf Highscores und updateLastHighscoreName
 
-extern TwallGame gameInstance;
+extern GameLogic gameInstance;
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-const char* ssid = "T-Wall";
-const char* password = "twallpassword"; // Muss mind. 8 Zeichen lang sein
+const char* ssid = "C-Wall";
+const char* password = "cwallpassword"; // Muss mind. 8 Zeichen lang sein
 
 const IPAddress localIP(192, 168, 1, 1);
 const IPAddress localGW(192, 168, 1, 1);

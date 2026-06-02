@@ -3,7 +3,7 @@
 #include <esp_timer.h>
 #include <esp_task_wdt.h>
 
-#include "TwallGame.h"
+#include "GameLogic.h"
 #include "config.h"
 #include "leds.h"
 #include "ioExpander.h"
@@ -14,7 +14,7 @@
 volatile bool isPressed[NUM_FIELDS];
 LED_Driver leds;
 HeartbeatLED heartbeat;
-TwallGame gameInstance(isPressed, leds);
+GameLogic gameInstance(isPressed, leds);
 
 
 void inputTask(void *pvParameters);

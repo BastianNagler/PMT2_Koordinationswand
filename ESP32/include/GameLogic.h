@@ -20,9 +20,9 @@
 enum GameState { IDLE, PLAYING, RIPPLE_ANIM, GAME_OVER, COOLDOWN };
 enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
-class TwallGame {
+class GameLogic {
 public:
-    TwallGame(volatile bool* inputState, LED_Driver& ledDriver);
+    GameLogic(volatile bool* inputState, LED_Driver& ledDriver);
     
     void init();
     void run(uint32_t currentTime);

@@ -1,11 +1,11 @@
-#include "TwallGame.h"
+#include "GameLogic.h"
 #include <cmath>
 
 // --- Constants for game-process ---
 const uint32_t GAME_DURATION_MS = 60000;
 const uint32_t COOLDOWN_DURATION_MS = 5000;
 const uint32_t IDLE_BLINK_INTERVAL_MS = 500;
-const uint32_t RIPPLE_ANIMATION_DURATION_MS = 300;
+const uint32_t RIPPLE_ANIMATION_DURATION_MS = 150;
 const uint8_t INVALID_TARGET = 99;
 
 // --- Color Config ---
@@ -13,25 +13,27 @@ const uint32_t COLOR_SINGLE_PLAYER = GREEN;
 const uint32_t COLOR_MULTIPLAYER_IDLE = BLUE;
 const uint32_t COLOR_P1 = MAGENTA;
 const uint32_t COLOR_P2 = ORANGE;
+const uint32_t COLOR_P1_RIPPLE = WHITE;
+const uint32_t COLOR_P2_RIPPLE = WHITE;
 
-TwallGame::TwallGame(volatile bool* inputState, LED_Driver& ledDriver)
+GameLogic::GameLogic(volatile bool* inputState, LED_Driver& ledDriver)
     : isPressed(inputState), leds(ledDriver) 
 {
 }
 
-void TwallGame::init()
+void GameLogic::init()
 {
     highscoreManager.load();
 }
 
-uint8_t TwallGame::getRandomGenerator(uint8_t min, uint8_t max)
+uint8_t GameLogic::getRandomGenerator(uint8_t min, uint8_t max)
 {
     if (min >= max) return min; 
     
     return esp_random() % (max-min) + min;
 }
 
-void TwallGame::set_next_target(uint8_t player)
+void GameLogic::set_next_target(uint8_t player)
 {
     uint8_t nextField;
     uint8_t* currentTarget = (player == 1) ? &targetP1 : &targetP2;
@@ -65,7 +67,7 @@ void TwallGame::set_next_target(uint8_t player)
     leds.set_rgb(color, *currentTarget);
 }
 
-void TwallGame::run(uint32_t currentTime) {    
+void GameLogic::run(uint32_t currentTime) {    
     switch (gameState) {
         case IDLE:        handleIdleState(currentTime);       break;
         case PLAYING:     handlePlayingState(currentTime);    break;
@@ -75,7 +77,7 @@ void TwallGame::run(uint32_t currentTime) {
     }
 }
 
-void TwallGame::handleIdleState(uint32_t currentTime) {
+void GameLogic::handleIdleState(uint32_t currentTime) {
     static bool lastBlinkState = false;
     bool currentBlinkState = (currentTime / IDLE_BLINK_INTERVAL_MS) % 2 == 0;
     
@@ -113,7 +115,7 @@ void TwallGame::handleIdleState(uint32_t currentTime) {
     }
 }
 
-void TwallGame::handlePlayingState(uint32_t currentTime) {
+void GameLogic::handlePlayingState(uint32_t currentTime) {
     if (isGameAbortRequested()) {
         Serial.println("Spiel vorzeitig abgebrochen!");
         gameState = GAME_OVER;
@@ -150,7 +152,7 @@ void TwallGame::handlePlayingState(uint32_t currentTime) {
     }
 }
 
-void TwallGame::handleRippleAnimState(uint32_t currentTime) {
+void GameLogic::handleRippleAnimState(uint32_t currentTime) {
     uint32_t elapsedTime = currentTime - animationStartTime;
 
     if (elapsedTime >= RIPPLE_ANIMATION_DURATION_MS) {
@@ -161,8 +163,8 @@ void TwallGame::handleRippleAnimState(uint32_t currentTime) {
 
         // relight other players target for multiplayer
         if (currentMode == MULTI_PLAYER) {
-            if (playerWhoScored == 1) leds.set_rgb(COLOR_P2, targetP2);
-            else leds.set_rgb(COLOR_P1, targetP1);
+            if (playerWhoScored == 1) leds.set_rgb(COLOR_P2_RIPPLE, targetP2);
+            else leds.set_rgb(COLOR_P1_RIPPLE, targetP1);
         }
         return;
     }
@@ -171,7 +173,7 @@ void TwallGame::handleRippleAnimState(uint32_t currentTime) {
     float progress = (float)elapsedTime / (float)RIPPLE_ANIMATION_DURATION_MS; // 0.0 thru 1.0
     uint8_t originRow = rippleOriginIndex / NUM_COLUMNS;
     uint8_t originCol = rippleOriginIndex % NUM_COLUMNS;
-    CRGB rippleBaseColor = (playerWhoScored == 1) ? CRGB(COLOR_P1) : CRGB(COLOR_P2);
+    CRGB rippleBaseColor = (playerWhoScored == 1) ? CRGB(COLOR_P1_RIPPLE) : CRGB(COLOR_P2_RIPPLE);
     float waveFront = progress * (NUM_COLUMNS / 1.5f); // waveform expanding
 
     for (int i = 0; i < NUM_FIELDS; i++) {
@@ -194,7 +196,7 @@ void TwallGame::handleRippleAnimState(uint32_t currentTime) {
     }
 }
 
-void TwallGame::handleGameOverState(uint32_t currentTime) {
+void GameLogic::handleGameOverState(uint32_t currentTime) {
     if (currentMode == SINGLE_PLAYER) {
         Serial.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
         highscoreManager.checkAndAdd(scoreP1);
@@ -210,18 +212,18 @@ void TwallGame::handleGameOverState(uint32_t currentTime) {
     gameState = COOLDOWN;
 }
 
-void TwallGame::handleCooldownState(uint32_t currentTime) {
+void GameLogic::handleCooldownState(uint32_t currentTime) {
     if (currentTime - cooldownStartTime >= COOLDOWN_DURATION_MS) {
         for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
         gameState = IDLE; 
     }
 }
 
-bool TwallGame::isGameAbortRequested() {
+bool GameLogic::isGameAbortRequested() {
     return isPressed[0] && isPressed[1] && isPressed[2] && isPressed[3];
 }
 
-void TwallGame::displayWinnerScreen() {
+void GameLogic::displayWinnerScreen() {
     if (currentMode == SINGLE_PLAYER) {
         for (int i = 0; i < NUM_FIELDS; i++) {
             leds.set_rgb(COLOR_SINGLE_PLAYER, i); 
