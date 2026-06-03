@@ -16,6 +16,10 @@ LED_Driver leds;
 HeartbeatLED heartbeat;
 GameLogic gameInstance(isPressed, leds);
 
+// --- Custom Panic Handler ---
+void custom_panic_handler(arduino_panic_info_t *info, void *arg) {
+    ws2812Write(HEARTBEAT_LED_PIN, 0x00FF00); 
+}
 
 void inputTask(void *pvParameters);
 void gameTask(void *pvParameters);
@@ -29,6 +33,8 @@ void setup()
 
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
     Wire.setTimeOut(100);
+
+    set_arduino_panic_handler(custom_panic_handler, NULL);
 
     xTaskCreatePinnedToCore(ledTask, "LED Task", 4096, NULL, 4, NULL, 1);
     xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, NULL, 3, NULL, 1);
