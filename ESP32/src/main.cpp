@@ -136,7 +136,6 @@ void ledTask(void *pvParameters)
 /// @brief Task for updating the Heartbeat-LED 
 void heartbeatTask(void *pvParameters)
 {
-    heartbeat.init();
     while(1)
     {
         heartbeat.update();

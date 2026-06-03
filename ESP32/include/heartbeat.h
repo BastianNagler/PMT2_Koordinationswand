@@ -1,7 +1,9 @@
 #pragma once
 #include <Arduino.h>
 #include <FastLED.h>
+#include <WS2812Write.h>
 #include "config.h"
+
 
 /*
     Heartbeat LED class to indicate system status.
@@ -12,14 +14,10 @@
 class HeartbeatLED
 {
 private:
-    CRGB led;
+    uint32_t color = 0xFFFF00;
     bool hasError = false;
-    CLEDController* controller;
 
 public:
-    /// @brief Initializes the Heartbeat LED
-    void init();
-
     /// @brief Updates the Heartbeat LED based on system status
     void update();
 
