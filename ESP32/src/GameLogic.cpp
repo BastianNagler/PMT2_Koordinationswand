@@ -163,8 +163,8 @@ void GameLogic::handleRippleAnimState(uint32_t currentTime) {
 
         // relight other players target for multiplayer
         if (currentMode == MULTI_PLAYER) {
-            if (playerWhoScored == 1) leds.set_rgb(COLOR_P2_RIPPLE, targetP2);
-            else leds.set_rgb(COLOR_P1_RIPPLE, targetP1);
+            if (playerWhoScored == 1) leds.set_rgb(COLOR_P2, targetP2);
+            else leds.set_rgb(COLOR_P1, targetP1);
         }
         return;
     }
