@@ -30,9 +30,9 @@ void setup()
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
     Wire.setTimeOut(100);
 
-    xTaskCreate(inputTask, "Input Task", 4096, NULL, 4, NULL);
-    xTaskCreate(gameTask, "Game Task", 4096, NULL, 3, NULL);
-    xTaskCreate(ledTask, "LED Task", 4096, NULL, 2, NULL);
+    xTaskCreatePinnedToCore(ledTask, "LED Task", 4096, NULL, 4, NULL, 1);
+    xTaskCreate(inputTask, "Input Task", 4096, NULL, 3, NULL);
+    xTaskCreate(gameTask, "Game Task", 4096, NULL, 2, NULL);
     xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
     xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
     vTaskDelete(NULL);
@@ -52,14 +52,26 @@ void inputTask(void *pvParameters)
         heartbeat.setError();
     }
 
+    /*
+    dirty fix because PCB broke for Box index 16: read box over GPIO18
+    if PCB gets fixed: delete following line and connect Sensor 16 back to IO-Expander
+    */
+    pinMode(18, INPUT);
+
     while (1) {
         if (!expanders.read(isPressed, NUM_FIELDS))
         {
             heartbeat.setError();
         }
 
+        /*
+        dirty fix because PCB broke for Box index 16: read box over GPIO18
+        if PCB gets fixed: delete following line and connect Sensor 16 back to IO-Expander
+        */
+        isPressed[16] = digitalRead(18);
+
         esp_task_wdt_reset();
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
