@@ -34,7 +34,7 @@ void setup()
     xTaskCreate(gameTask, "Game Task", 4096, NULL, 3, NULL);
     xTaskCreate(ledTask, "LED Task", 4096, NULL, 2, NULL);
     xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
-    // xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
+    xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
     vTaskDelete(NULL);
 }
 
@@ -59,7 +59,7 @@ void inputTask(void *pvParameters)
         }
 
         esp_task_wdt_reset();
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
@@ -96,7 +96,7 @@ void webTask(void *pvParameters)
         
         // --- 1. Check for status-change (Start / End) ---
         if (currentState != lastGameState) {
-            if (currentState == PLAYING) {
+            if (currentState == PLAYING && lastGameState != RIPPLE_ANIM) {
                 notifyGameStart(currentMode == SINGLE_PLAYER ? "single" : "multi");
                 lastScoreP1 = 0;
                 lastScoreP2 = 0;
