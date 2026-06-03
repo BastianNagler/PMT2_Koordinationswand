@@ -31,10 +31,10 @@ void setup()
     Wire.setTimeOut(100);
 
     xTaskCreatePinnedToCore(ledTask, "LED Task", 4096, NULL, 4, NULL, 1);
-    xTaskCreate(inputTask, "Input Task", 4096, NULL, 3, NULL);
-    xTaskCreate(gameTask, "Game Task", 4096, NULL, 2, NULL);
-    xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
-    xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
+    xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, NULL, 3, NULL, 1);
+    xTaskCreatePinnedToCore(gameTask, "Game Task", 4096, NULL, 2, NULL, 1);
+    xTaskCreatePinnedToCore(webTask, "Web Task", 32768, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL, 1);
     vTaskDelete(NULL);
 }
 
