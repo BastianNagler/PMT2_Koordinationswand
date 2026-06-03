@@ -60,7 +60,7 @@ void GameLogic::set_next_target(uint8_t player)
             nextField = (randRow * NUM_COLUMNS) + randCol;
         }
         
-    } while (nextField == *lastTarget || nextField == 16);
+    } while (nextField == *lastTarget);
 
     *currentTarget = nextField;
     *lastTarget = nextField;
