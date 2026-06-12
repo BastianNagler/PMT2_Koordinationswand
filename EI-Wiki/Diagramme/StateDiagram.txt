@@ -1,0 +1,18 @@
+stateDiagram-v2
+    [*] --> IDLE : Systemstart
+    
+    IDLE --> PLAYING : Spiel-Start-Taste gedrückt <br> (Single- oder Multiplayer)
+    
+    state PLAYING {
+        [*] --> WartenAufTreffer
+        
+        WartenAufTreffer --> RIPPLE_ANIMATION : Richtiges Ziel getroffen
+        
+        RIPPLE_ANIMATION --> WartenAufTreffer : Punkte erhöhen & <br> Neues Ziel setzen
+    }
+    
+    PLAYING --> GAME_OVER : 60 Sekunden abgelaufen<br>(oder manueller Abbruch)
+    
+    GAME_OVER --> COOLDOWN : Highscore speichern &<br>Gewinner-Farben anzeigen
+    
+    COOLDOWN --> IDLE : 5 Sekunden warten

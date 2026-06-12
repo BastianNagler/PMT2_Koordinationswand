@@ -1,0 +1,91 @@
+classDiagram
+direction LR
+    class WebInterface {
+	    +initWebInterface()
+	    +notifyGameStart(mode: const char*)
+	    +updateScore(scoreP1: uint8_t, scoreP2: uint8_t)
+	    +notifyGameOver()
+	    -onEvent()
+    }
+
+    class GameLogic {
+	    -isPressed: volatile bool*
+	    -leds: LED_Driver&
+	    -highscoreManager: HighscoreManager
+	    -gameState: GameState
+	    -currentMode: GameMode
+	    -scoreP1: uint8_t
+	    -scoreP2: uint8_t
+	    +GameLogic(inputState: volatile bool*, ledDriver: LED_Driver&)
+	    +init()
+	    +run(currentTime: uint32_t)
+	    +getGameState() GameState
+	    +getGameMode() GameMode
+	    +getScoreP1() uint8_t
+	    +getScoreP2() uint8_t
+	    +updateLastHighscoreName(newName: const char*)
+	    +getHighscores() const HighscoreEntry*
+	    -handleIdleState(currentTime: uint32_t)
+	    -handlePlayingState(currentTime: uint32_t)
+	    -set_next_target(player: uint8_t)
+    }
+
+    class HighscoreManager {
+	    -highscores: HighscoreEntry[10]
+	    -lastNewHighscoreIndex: int8_t
+	    +load()
+	    +save()
+	    +checkAndAdd(newScore: uint8_t)
+	    +updateLastHighscoreName(newName: const char*)
+	    +getHighscores() const HighscoreEntry*
+    }
+
+    class HighscoreEntry {
+	    +score: uint8_t
+	    +name: char[16]
+    }
+
+    class LED_Driver {
+	    -needs_refresh: bool
+	    -frame_buffer: CRGB[][]
+	    -physical_frame_buffer: CRGB[][]
+	    +init()
+	    +show(force: bool) bool
+	    +set_rgb(hex: uint32_t, index: uint8_t)
+	    +set_rgb(hex: uint32_t, row: uint8_t, column: uint8_t)
+	    -expand()
+    }
+
+    class IO_Expander {
+	    -num_io_exp: uint8_t
+	    -io_exp: std::vector
+	    +IO_Expander(num_io_exp: uint8_t, addresses: uint8_t*, irq_pins: uint8_t*)
+	    +init() bool
+	    +read(isPressed: volatile bool*, numFields: uint8_t) bool
+    }
+
+    class MCP23018 {
+	    -i2cAddress: uint8_t
+	    -interruptPin: uint8_t
+	    +needsRead: bool
+	    +MCP23018(i2cAddress: uint8_t, interruptPin: uint8_t)
+	    +init() bool
+	    +read(data: uint16_t& out) bool
+    }
+
+    class HeartbeatLED {
+	    -led: CRGB
+	    -hasError: bool
+	    +init()
+	    +update()
+	    +setError()
+    }
+
+	<<struct>> HighscoreEntry
+
+    WebInterface --> GameLogic : checks current states and updates accordingly
+    GameLogic *-- HighscoreManager
+    HighscoreManager *-- HighscoreEntry
+    GameLogic o-- LED_Driver : caslls set_rgb-functions
+    IO_Expander *-- MCP23018
+    IO_Expander ..> GameLogic : updates global button-states for GameLogic to check

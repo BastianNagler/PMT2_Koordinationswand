@@ -1,0 +1,33 @@
+---
+config:
+  layout: dagre
+---
+flowchart LR
+ subgraph subGraph0["Externe Steuerung"]
+        Tablet["Browser"]
+  end
+ subgraph Zentraleinheit["ESP32"]
+        ESP["ESP32-S3"]
+        FS[("LittleFS Speicher<br>highscores.dat")]
+  end
+ subgraph subGraph2["Eingabe"]
+        MCP1["MCP23018<br>IO-Expander"]
+        Sensors(("Sensoren"))
+  end
+ subgraph subGraph3["Ausgabe"]
+        LED1["WS2812b LEDs"]
+        Level-Shifter["Level-Shifter"]
+        StatusLED(("Heartbeat LED"))
+  end
+ subgraph subGraph4["I/O-Hardware"]
+        subGraph2
+        subGraph3
+  end
+    Tablet <-- WiFi Access Point<br>WebSockets --> ESP
+    ESP <-- Flash Memory --> FS
+    MCP1 <-- I2C --> ESP
+    MCP1 --- Sensors
+    ESP -- LED Data Pin --> Level-Shifter
+    Level-Shifter --> LED1
+    ESP -- Status Pin --> StatusLED
+    MCP1 -- Hardware Interrupt --> ESP

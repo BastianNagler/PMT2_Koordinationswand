@@ -1,0 +1,39 @@
+sequenceDiagram
+    participant Browser as Client (script.js)
+    participant Web as ESP32 WebInterface
+    participant Game as TwallGame
+    participant HS as HighscoreManager
+    participant FS as LittleFS
+
+    Note over Browser, Web: Verbindung wird aufgebaut
+    Browser->>Web: WebSocket Connect (ws://ip/ws)
+    Web-->>Browser: Connection Established
+
+    Note over Browser, Game: Ein neues Spiel startet
+    Game->>Web: notifyGameStart("single" / "multi")
+    Web->>Browser: JSON {action: "start game", mode: "..."}
+    Browser-->>Browser: startGameUI(mode) (Timer startet)
+
+    loop Während des aktiven Spiels
+        Game->>Web: updateScore(p1, p2)
+        Web->>Browser: JSON {action: "update counter", scoreP1, scoreP2}
+        Browser-->>Browser: updateScores(p1, p2)
+    end
+
+    Note over Browser, FS: Das Spiel ist beendet
+    Game->>HS: checkAndAdd(finalScore)
+    HS->>FS: save() (highscores.dat aktualisieren)
+    Game->>Web: notifyGameOver()
+    Web->>Browser: JSON {action: "end of game", highscoreList: [...]}
+    Browser-->>Browser: endGameUI() & renderHighscores()
+
+    opt Spieler erreicht neuen Highscore ohne Name
+        Browser-->>Browser: Zeigt Namensfeld (rot)
+        Browser->>Web: JSON {action: "set name", playerName: "Basti"}
+        Web->>Game: updateLastHighscoreName("Basti")
+        Game->>HS: updateLastHighscoreName("Basti")
+        HS->>FS: save()
+        Game->>Web: notifyGameOver()
+        Web->>Browser: JSON {action: "end of game", highscoreList: [...]}
+        Browser-->>Browser: Highscore-Tabelle aktualisiert
+    end

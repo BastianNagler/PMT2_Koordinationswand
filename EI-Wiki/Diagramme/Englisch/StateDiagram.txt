@@ -1,0 +1,18 @@
+stateDiagram-v2
+    [*] --> IDLE : Start
+    
+    IDLE --> PLAYING : Start-Button pressed
+    
+    state PLAYING {
+        [*] --> WaitForHit
+        
+        WaitForHit --> RIPPLE_ANIMATION : Hit correct field
+        
+        RIPPLE_ANIMATION --> WaitForHit : increment score & <br> set new target
+    }
+    
+    PLAYING --> GAME_OVER : 60 seconds elapsed
+    
+    GAME_OVER --> COOLDOWN : save highscore &<br>show winner
+    
+    COOLDOWN --> IDLE : wait 5 seconds

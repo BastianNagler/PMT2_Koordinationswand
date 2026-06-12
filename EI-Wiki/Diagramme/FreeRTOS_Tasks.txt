@@ -1,0 +1,39 @@
+---
+config:
+  layout: dagre
+---
+flowchart TB
+ subgraph subGraph0["Hardware (Eingabe)"]
+        Sensors["Touch-Sensoren"]
+  end
+ subgraph subGraph1["FreeRTOS Tasks"]
+        IT["Input Task<br>Liest alle 20ms"]
+        GT["Game Task<br>Berechnet alle 10ms"]
+        LT["LED Task<br>Aktualisiert alle 16ms"]
+        WT["Web Task<br>Prüft alle 100ms"]
+        HT["Heartbeat Task<br>Blinkt alle 30ms"]
+  end
+ subgraph subGraph2["Geteilter Speicher (Schnittstellen)"]
+        GameLogic{"Aktueller Spielstatus<br>&amp; Punktestände"}
+  end
+ subgraph subGraph4["Geteilter Speicher (Schnittstellen)"]
+        InputArray@{ label: "Globale Sensor-Zustände<br>'isPressed'" }
+        LEDBuffer[("LED Framebuffer")]
+  end
+ subgraph subGraph3["Ausgabe / Externe Systeme"]
+        Web["WebSockets"]
+        LEDs["LEDs"]
+        StatusLED["Status LED auf ESP32"]
+  end
+    Sensors -- I2C Signale --> IT
+    IT -- schreibt --> InputArray
+    InputArray -- liest --> GT
+    GT <-- aktualisiert --> GameLogic
+    GT -- schreibt Farben --> LEDBuffer
+    LEDBuffer -- liest --> LT
+    LT -- steuert --> LEDs
+    GameLogic -- liest Status & Punkte --> WT
+    WT <-- JSON Updates --> Web
+    HT -- Systemstatus --> StatusLED
+
+    InputArray@{ shape: cylinder}

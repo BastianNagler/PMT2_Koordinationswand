@@ -1,0 +1,29 @@
+---
+config:
+  layout: fixed
+---
+flowchart LR
+ subgraph subGraph0["WebClient"]
+        Tablet["Browser"]
+  end
+ subgraph Zentraleinheit["ESP32"]
+        ESP["ESP32-S3"]
+        FS[("LittleFS Memory")]
+  end
+ subgraph subGraph2["Input"]
+        MCP1["IO-Expander"]
+        Sensors(("Touch-Sensors"))
+  end
+ subgraph subGraph3["Output"]
+        LED1["WS2812b LEDs"]
+        Level-Shifter["Level-Shifter"]
+        StatusLED(("Heartbeat LED"))
+  end
+    Sensors ---> MCP1
+    Level-Shifter --> LED1
+    MCP1 <-- I²C --> ESP
+    MCP1 -- Hardware Interrupt --> ESP
+    Tablet <-- WiFi Access Point --> ESP
+    ESP <-- Flash Memory --> FS
+    ESP -- LED Data Pin --> Level-Shifter
+    ESP -- Status Pin --> StatusLED

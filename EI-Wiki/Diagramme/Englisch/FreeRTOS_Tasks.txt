@@ -1,0 +1,39 @@
+---
+config:
+  layout: fixed
+---
+flowchart TB
+ subgraph subGraph0["Input"]
+        Sensors["Touch-Sensors"]
+  end
+ subgraph subGraph1["FreeRTOS Tasks"]
+        IT["Input Task<br>20ms"]
+        GT["Game Task<br>10ms"]
+        LT["LED Task<br>16ms"]
+        WT["Web Task<br>100ms"]
+        HT["Heartbeat Task<br>30ms"]
+  end
+ subgraph subGraph2["Shared Memory"]
+        GameLogic{"Current gamestate<br>&amp; scores"}
+  end
+ subgraph subGraph4["Shared Memory"]
+        InputArray@{ label: "Global sensor-states<br>'isPressed'" }
+        LEDBuffer[("LED Framebuffer")]
+  end
+ subgraph subGraph3["Output"]
+        Web["WebSocket"]
+        LEDs["LEDs"]
+        StatusLED["Onboard LED"]
+  end
+    Sensors -- I²C Signals --> IT
+    IT -- writes --> InputArray
+    InputArray -- reads --> GT
+    LT -- controls --> LEDs
+    GameLogic -- checks gamestate & scores --> WT
+    WT <-- JSON Updates --> Web
+    GT -- writes colors --> LEDBuffer
+    GT <-- refreshes --> GameLogic
+    LEDBuffer -- reads --> LT
+    HT -- Systemstate --> StatusLED
+
+    InputArray@{ shape: cylinder}
