@@ -62,7 +62,7 @@ void inputTask(void *pvParameters)
     dirty fix because PCB broke for Box index 16: read box over GPIO18
     if PCB gets fixed: delete following line and connect Sensor 16 back to IO-Expander
     */
-    pinMode(18, INPUT);
+    // pinMode(18, INPUT);
 
     while (1) {
         if (!expanders.read(isPressed, NUM_FIELDS))
@@ -74,7 +74,7 @@ void inputTask(void *pvParameters)
         dirty fix because PCB broke for Box index 16: read box over GPIO18
         if PCB gets fixed: delete following line and connect Sensor 16 back to IO-Expander
         */
-        isPressed[16] = digitalRead(18);
+        // isPressed[16] = digitalRead(18);
 
         esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -118,7 +118,7 @@ void webTask(void *pvParameters)
                 notifyGameStart(currentMode == SINGLE_PLAYER ? "single" : "multi");
                 lastScoreP1 = 0;
                 lastScoreP2 = 0;
-            } else if (currentState == GAME_OVER) {
+            } else if (currentState == GAME_OVER || currentState == COOLDOWN) {
                 notifyGameOver();
             }
             lastGameState = currentState;
