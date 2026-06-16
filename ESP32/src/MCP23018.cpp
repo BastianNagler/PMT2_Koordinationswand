@@ -18,7 +18,7 @@ bool MCP23018::init()
     Wire.beginTransmission(i2cAddress);
     if(Wire.endTransmission())
     {
-        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Please fix issue");
+        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Please fix issue\n", i2cAddress);
         return false;
     }
     else

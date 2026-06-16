@@ -70,6 +70,10 @@ void initWebInterface() {
     Serial.println("Webserver gestartet.");
 }
 
+void cleanupWebInterface() {
+    ws.cleanupClients();
+}
+
 // --- Senden von Nachrichten an den Browser ---
 
 void notifyGameStart(const char* mode) {

@@ -36,11 +36,11 @@ void setup()
 
     set_arduino_panic_handler(custom_panic_handler, NULL);
 
-    xTaskCreatePinnedToCore(ledTask, "LED Task", 4096, NULL, 4, NULL, 1);
-    xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, NULL, 3, NULL, 1);
-    xTaskCreatePinnedToCore(gameTask, "Game Task", 4096, NULL, 2, NULL, 1);
-    xTaskCreatePinnedToCore(webTask, "Web Task", 32768, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL, 1);
+    xTaskCreate(ledTask, "LED Task", 4096, NULL, 4, NULL);
+    xTaskCreate(inputTask, "Input Task", 4096, NULL, 3, NULL);
+    xTaskCreate(gameTask, "Game Task", 8192, NULL, 2, NULL);
+    xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
+    xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
     vTaskDelete(NULL);
 }
 
@@ -112,6 +112,8 @@ void webTask(void *pvParameters)
         uint8_t scoreP1 = gameInstance.getScoreP1();
         uint8_t scoreP2 = gameInstance.getScoreP2();
         
+        cleanupWebInterface();
+
         // --- 1. Check for status-change (Start / End) ---
         if (currentState != lastGameState) {
             if (currentState == PLAYING && lastGameState != RIPPLE_ANIM) {
