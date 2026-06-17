@@ -140,6 +140,7 @@ void notifyGameStart(const char* mode) {
     JsonDocument doc;
     doc["action"] = "start game";
     doc["mode"] = mode; // "single" oder "multi"
+    doc["durationMs"] = gameInstance.settings.gameDurationMs;
     
     String output;
     serializeJson(doc, output);

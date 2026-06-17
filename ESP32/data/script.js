@@ -40,7 +40,7 @@ function onMessage(event) {
             switch (myObj.action) {
 
                 case "start game":
-                    startGameUI(myObj.mode);
+                    startGameUI(myObj.mode, myObj.durationMs);
                     break;
 
                 case "update counter":
@@ -64,7 +64,7 @@ function onMessage(event) {
    UI UPDATE FUNKTIONEN
 ======================================== */
 
-function startGameUI(mode) {
+function startGameUI(mode, durationMs) {
     // Ansicht wechseln
     hide(document.getElementById("endofgamescreen"));
     show(document.getElementById("gamescreen"));
@@ -84,7 +84,7 @@ function startGameUI(mode) {
     }
 
     // Timer im Browser starten
-    timeLeft = 60;
+    timeLeft = durationMs ? Math.round(durationMs / 1000) : 60;
     document.getElementById("timerValue").innerHTML = timeLeft;
     clearInterval(timerInterval); // Alten Timer sicherheitshalber löschen
     
