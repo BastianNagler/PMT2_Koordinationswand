@@ -106,6 +106,10 @@ function updateScores(p1, p2) {
 function endGameUI(myObj) {
     clearInterval(timerInterval); // Timer stoppen, falls er noch lief
     
+    // Finalen Score vom ESP32 übernehmen, um Asynchronitäten zu vermeiden
+    if (myObj.finalScoreP1 !== undefined) document.getElementById("scoreP1").innerHTML = myObj.finalScoreP1;
+    if (myObj.finalScoreP2 !== undefined) document.getElementById("scoreP2").innerHTML = myObj.finalScoreP2;
+
     // Ansicht wechseln
     hide(document.getElementById("gamescreen"));
     show(document.getElementById("endofgamescreen"));

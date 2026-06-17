@@ -102,6 +102,8 @@ void updateScore(uint8_t scoreP1, uint8_t scoreP2) {
 void notifyGameOver() {
     JsonDocument doc;
     doc["action"] = "end of game";
+    doc["finalScoreP1"] = gameInstance.getScoreP1();
+    doc["finalScoreP2"] = gameInstance.getScoreP2();
     
     const HighscoreEntry* highscores = gameInstance.getHighscores();
 
