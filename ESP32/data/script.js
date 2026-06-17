@@ -158,7 +158,7 @@ function renderHighscores(highscores) {
         
         listContainer.appendChild(listItem);
 
-        if(player.playerName == "TrageDeinenNamen"){
+        if(player.playerName == "Insert Name"){
             showEditForm(index, player.playerName);
         }
     });
@@ -168,7 +168,7 @@ function renderHighscores(highscores) {
 function showEditForm(index, oldName){
     selectedHighscore = index;
 
-    var itmes = document.getElementById("highscore-item");
+    var items = document.getElementsByClassName("highscore-item");
     for (var i = 0; i < items.length; i++) {
         items[i].classList.remove("selected");
     }
@@ -199,7 +199,7 @@ function handlePlayerNameForm(event) {
         // Feld nach dem Senden verstecken, wir warten auf die neue Liste vom ESP32
         hide(document.getElementById("nameInputSection"));
 
-        var itmes = document.getElementById("highscore-item");
+        var items = document.getElementsByClassName("highscore-item");
         for (var i = 0; i < items.length; i++) {
             items[i].classList.remove("selected");
         }

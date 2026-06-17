@@ -1,7 +1,7 @@
 #include "HighscoreManager.h"
 #include <string.h> // Für strncpy
 
-const char* HIGHSCORE_PLACEHOLDER_NAME = "TrageDeinenNamenein!";
+const char* HIGHSCORE_PLACEHOLDER_NAME = "Insert Name";
 
 void HighscoreManager::load() {
     if (LittleFS.exists("/highscores.dat")) {
