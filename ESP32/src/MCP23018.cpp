@@ -52,6 +52,11 @@ bool MCP23018::init()
     Wire.write(0x00);
     Wire.endTransmission();
 
+    uint16_t trash;
+    read(trash);
+    //prohibit optimization
+    asm volatile("" : : "g"(trash) : "memory");
+
     pinMode(interruptPin, INPUT);
     attachInterruptArg(digitalPinToInterrupt(interruptPin), irqHandler, this, RISING);
 

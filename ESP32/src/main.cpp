@@ -16,11 +16,6 @@ LED_Driver leds;
 HeartbeatLED heartbeat;
 GameLogic gameInstance(isPressed, leds);
 
-// --- Custom Panic Handler ---
-void custom_panic_handler(arduino_panic_info_t *info, void *arg) {
-    ws2812Write(HEARTBEAT_LED_PIN, 0x00FF00); 
-}
-
 void inputTask(void *pvParameters);
 void gameTask(void *pvParameters);
 void webTask(void *pvParameters);
@@ -29,26 +24,23 @@ void heartbeatTask(void *pvParameters);
 
 void setup()
 {
+    delay(500);
     Serial.begin(115200);
 
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
     Wire.setTimeOut(100);
 
-    set_arduino_panic_handler(custom_panic_handler, NULL);
-
-    xTaskCreate(ledTask, "LED Task", 4096, NULL, 4, NULL);
-    xTaskCreate(inputTask, "Input Task", 4096, NULL, 3, NULL);
+    xTaskCreate(ledTask, "LED Task", 8192, NULL, 4, NULL);
+    xTaskCreatePinnedToCore(inputTask, "Input Task", 8192, NULL, 3, NULL, 1);
     xTaskCreate(gameTask, "Game Task", 8192, NULL, 2, NULL);
     xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
-    xTaskCreate(heartbeatTask, "Heartbeat Task", 4096, NULL, 0, NULL);
+    xTaskCreate(heartbeatTask, "Heartbeat Task", 8192, NULL, 0, NULL);
     vTaskDelete(NULL);
 }
 
 /// @brief Task for handling hardware inputs. High priority to ensure responsiveness.
 void inputTask(void *pvParameters) 
 {
-    esp_task_wdt_add(NULL);
-
     static const uint8_t io_exp_irq_pins[NUM_IO_EXPANDER] = IO_EXPANDER_IRQ_PINS;
     static const uint8_t io_exp_addresses[NUM_IO_EXPANDER] = IO_EXPANDER_ADDRESSES;
     static IO_Expander expanders(NUM_IO_EXPANDER, io_exp_addresses, io_exp_irq_pins);
@@ -62,19 +54,31 @@ void inputTask(void *pvParameters)
     dirty fix because PCB broke for Box index 16: read box over GPIO18
     if PCB gets fixed: delete following line and connect Sensor 16 back to IO-Expander
     */
-    // pinMode(18, INPUT);
+    pinMode(18, INPUT);
+
+    esp_task_wdt_add(NULL);
 
     while (1) {
         if (!expanders.read(isPressed, NUM_FIELDS))
         {
+            Serial.println("[ERROR] IO-Expander read failed! Resetting MCP23018s...");
             heartbeat.setError();
+            if (expanders.resetAndReinit())
+            {
+                Serial.println("[SUCCESS] MCP23018s reset and re-initialized successfully.");
+            }
+            else
+            {
+                Serial.println("[ERROR] Failed to re-initialize MCP23018s after reset.");
+            }
         }
 
         /*
         dirty fix because PCB broke for Box index 16: read box over GPIO18
         if PCB gets fixed: delete following line and connect Sensor 16 back to IO-Expander
         */
-        // isPressed[16] = digitalRead(18);
+        if(NUM_FIELDS >= 17)
+            isPressed[16] = digitalRead(18);
 
         esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(10));

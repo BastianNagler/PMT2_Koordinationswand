@@ -18,4 +18,5 @@ public:
 
     bool init();
     bool read(volatile bool* isPressed, const uint8_t numFields);
+    bool resetAndReinit();
 };

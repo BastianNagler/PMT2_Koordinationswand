@@ -53,3 +53,29 @@ bool IO_Expander::read(volatile bool* isPressed, const uint8_t numFields)
     }
     return true;
 }
+
+bool IO_Expander::resetAndReinit()
+{
+    Serial.println("Resetting MCP23018s via GPIO 12...");
+    
+    // Set RESET pin as output and pull it LOW to reset both expanders
+    pinMode(IO_EXPANDER_RESET_PIN, OUTPUT);
+    digitalWrite(IO_EXPANDER_RESET_PIN, LOW);
+    vTaskDelay(pdMS_TO_TICKS(10)); // Keep LOW for 10ms
+    
+    // Release RESET by pulling it HIGH
+    digitalWrite(IO_EXPANDER_RESET_PIN, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(10)); // Wait 10ms for expanders to boot up
+    
+    // Reconfigure both expanders
+    bool success = true;
+    for (uint8_t i = 0; i < num_io_exp; i++)
+    {
+        if (!io_exp[i]->init())
+        {
+            success = false;
+        }
+    }
+    return success;
+}
+

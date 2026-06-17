@@ -33,3 +33,5 @@
 #define I2C_SDA_PIN 8
 #define IO_EXPANDER_ADDRESSES {0x20, 0x21} // Change to actual addresses
 #define IO_EXPANDER_IRQ_PINS {10, 14} // Change to actual pins
+#define IO_EXPANDER_RESET_PIN 12
+
