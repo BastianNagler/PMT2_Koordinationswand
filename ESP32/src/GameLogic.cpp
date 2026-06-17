@@ -143,7 +143,7 @@ void GameLogic::handlePlayingState(uint32_t currentTime) {
 
     // player 1 check hit
     if (targetP1 < NUM_FIELDS && isPressed[targetP1]) {
-        scoreP1++;
+        scoreP1 += 1;
         leds.set_rgb(OFF, targetP1);
         
         gameState = RIPPLE_ANIM;
@@ -155,7 +155,7 @@ void GameLogic::handlePlayingState(uint32_t currentTime) {
     
     // player 2 check hit (multiplayer only)
     if (currentMode == MULTI_PLAYER && targetP2 < NUM_FIELDS && isPressed[targetP2]) {
-        scoreP2++;
+        scoreP2 += 1;
         leds.set_rgb(OFF, targetP2);
 
         gameState = RIPPLE_ANIM;
