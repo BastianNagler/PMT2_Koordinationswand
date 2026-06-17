@@ -216,8 +216,6 @@ void GameLogic::handleGameOverState(uint32_t currentTime) {
         highscoreManager.checkAndAdd(scoreP1);
     } else {
         Serial.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
-        highscoreManager.checkAndAdd(scoreP1);
-        highscoreManager.checkAndAdd(scoreP2);
     }
     
     displayWinnerScreen();
@@ -259,4 +257,8 @@ void GameLogic::displayWinnerScreen() {
             }
         }
     }
+}
+
+void GameLogic::updateHighscoreName(const int index, const char* newName) {
+    highscoreManager.updateHighscoreName(index, newName);
 }

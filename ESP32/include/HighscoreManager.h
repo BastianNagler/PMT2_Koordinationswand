@@ -17,7 +17,7 @@ public:
     
     void load();
     void checkAndAdd(uint8_t newScore);
-    void updateLastHighscoreName(const char* newName);
+    void updateHighscoreName(const int index, const char* newName);
     
     const HighscoreEntry* getHighscores() const { return highscores; }
 
