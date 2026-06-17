@@ -7,9 +7,17 @@ void HighscoreManager::load() {
     if (LittleFS.exists("/highscores.dat")) {
         File file = LittleFS.open("/highscores.dat", "r");
         if (file) {
-            file.read((uint8_t*)highscores, sizeof(highscores));
+            size_t bytesRead = file.read((uint8_t*)highscores, sizeof(highscores));
             file.close();
-            Serial.println("Highscores aus LittleFS geladen.");
+            if (bytesRead == sizeof(highscores)) {
+                Serial.println("Highscores aus LittleFS geladen.");
+            } else {
+                Serial.println("Highscore-Datei unvollständig oder beschädigt. Initialisiere neu...");
+                for (int i = 0; i < 10; i++) {
+                    highscores[i].score = 0;
+                    strlcpy(highscores[i].name, "---", MAX_NAME_LEN);
+                }
+            }
         }
     } else {
         Serial.println("Keine Highscore-Datei gefunden, initialisiere neu...");
