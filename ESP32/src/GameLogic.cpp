@@ -109,9 +109,18 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
         // set mode and generate first targets
         if (pressed0) {
             currentMode = SINGLE_PLAYER;
+            lastP1 = 0; // Prevent first target on start button
             set_next_target(1); 
         } else if (pressed7 || pressed15) {
             currentMode = MULTI_PLAYER;
+            if(pressed7)
+            {
+                lastP2 = 7;
+            }
+            else
+            {
+                lastP2 = 15;
+            }
             set_next_target(1);
             set_next_target(2);
         }
