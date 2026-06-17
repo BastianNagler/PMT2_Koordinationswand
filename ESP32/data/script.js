@@ -163,6 +163,16 @@ function renderHighscores(highscores) {
 
 function showEditForm(index, oldName){
     selectedHighscore = index;
+
+    var itmes = document.getElementById("highscore-item");
+    for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove("selected");
+    }
+    
+    if (items[index]) {
+        items[index].classList.add("selected");
+    }
+
     document.getElementById("playerNameInput").value = oldName;
     show(document.getElementById("nameInputSection"));
     document.getElementById("playerNameInput").innerHtml = oldName;
@@ -184,6 +194,11 @@ function handlePlayerNameForm(event) {
         
         // Feld nach dem Senden verstecken, wir warten auf die neue Liste vom ESP32
         hide(document.getElementById("nameInputSection"));
+
+        var itmes = document.getElementById("highscore-item");
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.remove("selected");
+        }
     }
 }
 

@@ -120,6 +120,11 @@ body {
             transform: scale(1.01);
         }
 
+.highscore-item.selected {
+            background-color: #e6c772;
+            transform: scale(1.01);
+        }
+
 .highscore-item:last-child {
     border-bottom: none;
 }
