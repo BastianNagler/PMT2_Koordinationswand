@@ -1,5 +1,17 @@
 #include "MCP23018.h"
 
+static const char* getI2CErrorStr(uint8_t err) {
+    switch (err) {
+        case 0: return "Success";
+        case 1: return "Data too long";
+        case 2: return "NACK on address (Device not found/no response)";
+        case 3: return "NACK on data";
+        case 4: return "Other error";
+        case 5: return "Timeout";
+        default: return "Unknown error";
+    }
+}
+
 static void irqHandler(void* arg)
 {
     MCP23018* mcp = static_cast<MCP23018*>(arg);
@@ -16,9 +28,10 @@ bool MCP23018::init()
 {
     // check if MCP23018 is connected
     Wire.beginTransmission(i2cAddress);
-    if(Wire.endTransmission())
+    uint8_t err = Wire.endTransmission();
+    if (err != 0)
     {
-        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Please fix issue\n", i2cAddress);
+        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
         return false;
     }
     else
@@ -50,9 +63,10 @@ bool MCP23018::init()
     // GPPU: Set Pull-Ups to none
     Wire.write(0x00);
     Wire.write(0x00);
-    if (Wire.endTransmission() != 0)
+    uint8_t err = Wire.endTransmission();
+    if (err != 0)
     {
-        Serial.printf("MCP23018 (0x%02x) configuration failed on I2C write.\n", i2cAddress);
+        Serial.printf("MCP23018 (0x%02x) configuration failed. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
         return false;
     }
 
@@ -78,7 +92,9 @@ bool MCP23018::read(uint16_t& data)
 
     Wire.beginTransmission(i2cAddress);
     Wire.write(0x12);
-    if (Wire.endTransmission() != 0) {
+    uint8_t err = Wire.endTransmission();
+    if (err != 0) {
+        Serial.printf("I2C write error for MCP23018 (0x%02x) on select register 0x12: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
         return false;
     }
 
