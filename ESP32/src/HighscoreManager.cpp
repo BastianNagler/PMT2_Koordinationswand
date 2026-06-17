@@ -72,10 +72,10 @@ void HighscoreManager::checkAndAdd(uint8_t newScore) {
     Serial.printf("Neuer Highscore auf Platz %d gespeichert!\n", insertPos + 1);
 }
 
-void HighscoreManager::updateLastHighscoreName(const char* newName) {
-    if (lastNewHighscoreIndex >= 0 && lastNewHighscoreIndex < 10) {
-        strlcpy(highscores[lastNewHighscoreIndex].name, newName, MAX_NAME_LEN);
-        save();
-        Serial.printf("Name für Platz %d aktualisiert: %s\n", lastNewHighscoreIndex + 1, newName);
-    }
+void HighscoreManager::updateHighscoreName(const int index, const char *newName)
+{
+
+    strlcpy(highscores[index].name, newName, MAX_NAME_LEN);
+    save();
+    Serial.printf("Name für Platz %d aktualisiert: %s\n", index + 1, newName);
 }

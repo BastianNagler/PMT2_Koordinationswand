@@ -5,6 +5,8 @@ var websocket;
 var timerInterval;
 var timeLeft = 60;
 
+var selectedHighscore;
+
 window.addEventListener('load', onload);
 
 function onload(event) {
@@ -126,7 +128,9 @@ function updateFinalScoreDisplay() {
     if (!p2Visible) {
         text = `Singleplayer: ${p1Score} Punkte`;
     } else {
-        text = `Multiplayer - P1: ${p1Score} | P2: ${p2Score}<br>`;
+        text = `Multiplayer<br>
+                - <br>
+                P1: ${p1Score} | P2: ${p2Score}<br>`;
         if (p1Score > p2Score) text += "<strong>(Player 1 gewinnt!)</strong>";
         else if (p2Score > p1Score) text += "<strong>(Player 2 gewinnt!)</strong>";
         else text += "<strong>(Unentschieden!)</strong>";
@@ -140,33 +144,29 @@ function renderHighscores(highscores) {
     if (!listContainer) return;
 
     listContainer.innerHTML = "";
-    var needsName = false;
 
     highscores.forEach(function (player, index) {
         var listItem = document.createElement("div");
         listItem.className = "highscore-item";
+        listItem.onclick = function(){showEditForm(index, player.playerName);};
         
-        // Prüfen, ob das der neue, unbenannte Highscore ist
-        if (player.playerName === "TrageDeinenNamenein!") {
-            needsName = true;
-            listItem.style.color = "#d9534f"; // Rot hervorheben
-            listItem.style.fontWeight = "bold";
-            listItem.innerHTML = `${index + 1} — NEUER HIGHSCORE: ${player.counterValue} pts`;
-        } else {
-            // Normaler Eintrag
-            listItem.innerHTML = `${index + 1} — ${player.playerName}: ${player.counterValue} pts`;
-        }
+        listItem.innerHTML = `${index + 1} — ${player.playerName}: ${player.counterValue} pts`;
+        
         listContainer.appendChild(listItem);
+
+        if(player.playerName == "TrageDeinenNamen"){
+            showEditForm(index, player.playerName);
+        }
     });
 
-    // Zeige das Namens-Eingabefeld an, wenn ein Name fehlt
-    if (needsName) {
-        show(document.getElementById("nameInputSection"));
-        document.getElementById("playerNameInput").value = ""; // Feld leeren
-        document.getElementById("playerNameInput").focus();
-    } else {
-        hide(document.getElementById("nameInputSection"));
-    }
+}
+
+function showEditForm(index, oldName){
+    selectedHighscore = index;
+    document.getElementById("playerNameInput").value = oldName;
+    show(document.getElementById("nameInputSection"));
+    document.getElementById("playerNameInput").innerHtml = oldName;
+    document.getElementById("playerNameInput").focus();
 }
 
 // Namensformular an ESP32 senden
@@ -177,6 +177,7 @@ function handlePlayerNameForm(event) {
     if (nameInput && websocket && websocket.readyState === WebSocket.OPEN) {
         const data = {
             action: "set name",
+            index: selectedHighscore,
             playerName: nameInput
         };
         websocket.send(JSON.stringify(data));

@@ -34,7 +34,8 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
                 // Wenn das Tablet einen neuen Namen schickt
                 if (doc["action"] == "set name") {
                     const char* newName = doc["playerName"];
-                    gameInstance.updateLastHighscoreName(newName);
+                    const int index = doc["index"];
+                    gameInstance.updateHighscoreName(index, newName);
                     
                     // Schicke direkt die aktualisierte Highscore-Liste an alle zurück
                     notifyGameOver(); 

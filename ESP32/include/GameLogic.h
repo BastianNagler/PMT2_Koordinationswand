@@ -33,7 +33,7 @@ public:
     uint8_t getScoreP2() const { return scoreP2; }
     const HighscoreEntry* getHighscores() const { return highscoreManager.getHighscores(); }
     
-    void updateLastHighscoreName(const char* newName) { highscoreManager.updateLastHighscoreName(newName); }
+    void updateHighscoreName(const int index, const char* newName);
 
 private:
     volatile bool* isPressed;
