@@ -47,8 +47,8 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 }
 
 void initWebInterface() {
-    if (!LittleFS.begin(true)) {
-        Serial.println("Fehler beim Mounten von LittleFS");
+    if (!LittleFS.exists("/index.html")) {
+        Serial.println("HTML-File nicht gefunden");
         return;
     }
     

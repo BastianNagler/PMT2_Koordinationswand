@@ -4,11 +4,6 @@
 const char* HIGHSCORE_PLACEHOLDER_NAME = "TrageDeinenNamenein!";
 
 void HighscoreManager::load() {
-    // Sicherheitshalber LittleFS initialisieren (falls der Game-Task vor dem Web-Task startet)
-    if (!LittleFS.begin(true)) {
-        Serial.println("Fehler beim Mounten von LittleFS im HighscoreManager");
-    }
-
     if (LittleFS.exists("/highscores.dat")) {
         File file = LittleFS.open("/highscores.dat", "r");
         if (file) {

@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <esp_timer.h>
 #include <esp_task_wdt.h>
+#include <LittleFS.h>
 
 #include "GameLogic.h"
 #include "config.h"
@@ -26,6 +27,16 @@ void setup()
 {
     delay(500);
     Serial.begin(115200);
+
+    // Initialize LittleFS once at startup
+    if (!LittleFS.begin(true))
+    {
+        Serial.println("[ERROR] LittleFS mounting failed during setup!");
+    }
+    else
+    {
+        Serial.println("[SUCCESS] LittleFS mounted successfully.");
+    }
 
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
     Wire.setTimeOut(100);
