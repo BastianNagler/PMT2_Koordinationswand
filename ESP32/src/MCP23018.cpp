@@ -50,10 +50,18 @@ bool MCP23018::init()
     // GPPU: Set Pull-Ups to none
     Wire.write(0x00);
     Wire.write(0x00);
-    Wire.endTransmission();
+    if (Wire.endTransmission() != 0)
+    {
+        Serial.printf("MCP23018 (0x%02x) configuration failed on I2C write.\n", i2cAddress);
+        return false;
+    }
 
     uint16_t trash;
-    read(trash);
+    if (!read(trash))
+    {
+        Serial.printf("MCP23018 (0x%02x) initial read failed.\n", i2cAddress);
+        return false;
+    }
     //prohibit optimization
     asm volatile("" : : "g"(trash) : "memory");
 
@@ -70,7 +78,9 @@ bool MCP23018::read(uint16_t& data)
 
     Wire.beginTransmission(i2cAddress);
     Wire.write(0x12);
-    Wire.endTransmission();
+    if (Wire.endTransmission() != 0) {
+        return false;
+    }
 
     Wire.requestFrom(i2cAddress, (uint8_t)2);
 
