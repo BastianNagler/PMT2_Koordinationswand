@@ -102,9 +102,11 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
         if (pressed0) {
             currentMode = SINGLE_PLAYER;
             lastP1 = 0; // Prevent first target on start button
+            WebLog.println("[GAME] Start Singleplayer (triggered by button 0)");
             set_next_target(1); 
         } else if (pressed7 || pressed15) {
             currentMode = MULTI_PLAYER;
+            WebLog.printf("[GAME] Start Multiplayer (triggered by button %d)\n", pressed7 ? 7 : 15);
             if(pressed7)
             {
                 lastP2 = 7;
