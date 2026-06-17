@@ -27,7 +27,7 @@
 #define LED_DRIVER_2_PIN 40
 #define LED_DRIVER_3_PIN 39
 
-#define HEARTBEAT_LED_PIN 48
+#define HEARTBEAT_LED_PIN 38
 
 #define I2C_SCL_PIN 9
 #define I2C_SDA_PIN 8

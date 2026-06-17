@@ -6,11 +6,11 @@ void HeartbeatLED::update()
 
     if (hasError)
     {
-        color = (brightness << 16); // Rot pulsieren
+        color = (brightness << 8); // Rot pulsieren
     }
     else
     {
-        color = (brightness << 8); // Grün pulsieren
+        color = (brightness << 16); // Grün pulsieren
     }
     ws2812Write(HEARTBEAT_LED_PIN, color);
 }
