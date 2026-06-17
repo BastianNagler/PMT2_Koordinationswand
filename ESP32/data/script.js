@@ -119,7 +119,7 @@ function endGameUI(myObj) {
 
     // Highscores rendern
     if (myObj.highscoreList && Array.isArray(myObj.highscoreList)) {
-        renderHighscores(myObj.highscoreList);
+        renderHighscores(myObj.highscoreList, myObj.isDefaultTime);
     }
 }
 
@@ -143,9 +143,18 @@ function updateFinalScoreDisplay() {
     document.getElementById("finalScoreDisplay").innerHTML = text;
 }
 
-function renderHighscores(highscores) {
+function renderHighscores(highscores, isDefaultTime) {
     var listContainer = document.getElementById("highscoreDisplay");
     if (!listContainer) return;
+
+    var titleElement = document.querySelector(".highscores h2");
+    if (titleElement) {
+        if (isDefaultTime || isDefaultTime === undefined) {
+            titleElement.innerText = "Highscores (60s)";
+        } else {
+            titleElement.innerText = "Highscores (Custom Zeit)";
+        }
+    }
 
     listContainer.innerHTML = "";
 

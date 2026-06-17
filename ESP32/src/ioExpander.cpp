@@ -1,4 +1,5 @@
 #include "ioExpander.h"
+#include "WebLog.h"
 
 IO_Expander::IO_Expander(const uint8_t num_io_exp, const uint8_t* addresses, const uint8_t* irq_pins) : num_io_exp(num_io_exp)
 {
@@ -56,7 +57,7 @@ bool IO_Expander::read(volatile bool* isPressed, const uint8_t numFields)
 
 bool IO_Expander::resetAndReinit()
 {
-    Serial.println("Resetting MCP23018s via GPIO 12...");
+    WebLog.println("Resetting MCP23018s via GPIO 12...");
     
     // Set RESET pin as output and pull it LOW to reset both expanders
     pinMode(IO_EXPANDER_RESET_PIN, OUTPUT);

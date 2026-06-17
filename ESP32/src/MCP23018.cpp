@@ -1,4 +1,5 @@
 #include "MCP23018.h"
+#include "WebLog.h"
 
 static const char* getI2CErrorStr(uint8_t err) {
     switch (err) {
@@ -31,12 +32,12 @@ bool MCP23018::init()
     uint8_t err = Wire.endTransmission();
     if (err != 0)
     {
-        Serial.printf("MCP23018 (I2C-address 0x%02x) not found. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
+        WebLog.printf("MCP23018 (I2C-address 0x%02x) not found. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
         return false;
     }
     else
     {
-        Serial.printf("MCP23018 (I2C-address 0x%02x) successfully connected \n", i2cAddress);
+        WebLog.printf("MCP23018 (I2C-address 0x%02x) successfully connected \n", i2cAddress);
     }
 
     // configure MCP23018 internal registers
@@ -66,14 +67,14 @@ bool MCP23018::init()
     err = Wire.endTransmission();
     if (err != 0)
     {
-        Serial.printf("MCP23018 (0x%02x) configuration failed. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
+        WebLog.printf("MCP23018 (0x%02x) configuration failed. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
         return false;
     }
 
     uint16_t trash;
     if (!read(trash))
     {
-        Serial.printf("MCP23018 (0x%02x) initial read failed.\n", i2cAddress);
+        WebLog.printf("MCP23018 (0x%02x) initial read failed.\n", i2cAddress);
         return false;
     }
     //prohibit optimization
@@ -94,7 +95,7 @@ bool MCP23018::read(uint16_t& data)
     Wire.write(0x12);
     uint8_t err = Wire.endTransmission();
     if (err != 0) {
-        Serial.printf("I2C write error for MCP23018 (0x%02x) on select register 0x12: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
+        WebLog.printf("I2C write error for MCP23018 (0x%02x) on select register 0x12: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
         return false;
     }
 
@@ -107,7 +108,7 @@ bool MCP23018::read(uint16_t& data)
         data = (portB << 8) | portA;
         return true;
     } else {
-        Serial.printf("I2C read error for MCP23018 (0x%02x): expected 2 bytes, got %d\n", i2cAddress, Wire.available());
+        WebLog.printf("I2C read error for MCP23018 (0x%02x): expected 2 bytes, got %d\n", i2cAddress, Wire.available());
         return false;
     }
 }

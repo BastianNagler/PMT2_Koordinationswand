@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cWall - Einstellungen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="config.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+    </div>
+    
+    <div class="glass-container">
+        <div class="header">
+            <h1>Einstellungen</h1>
+            <button class="back-btn" onclick="window.close()">Zurück</button>
+        </div>
+        
+        <form id="configForm" onsubmit="saveConfig(event)">
+            <div class="section">
+                <h2>Allgemein</h2>
+                <div class="input-group">
+                    <label for="gameDurationMs">Spieldauer (Sekunden)</label>
+                    <input type="number" id="gameDurationMs" min="10" max="300" step="1" required>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Singleplayer</h2>
+                <div class="input-group color-group">
+                    <label for="colorSinglePlayer">Spielfarbe</label>
+                    <div class="color-wrapper"><input type="color" id="colorSinglePlayer"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Multiplayer</h2>
+                <div class="input-group color-group">
+                    <label for="colorMultiplayerIdle">Idle Farbe</label>
+                    <div class="color-wrapper"><input type="color" id="colorMultiplayerIdle"></div>
+                </div>
+                <div class="input-group color-group">
+                    <label for="colorP1">Spieler 1 Farbe</label>
+                    <div class="color-wrapper"><input type="color" id="colorP1"></div>
+                </div>
+                <div class="input-group color-group">
+                    <label for="colorP2">Spieler 2 Farbe</label>
+                    <div class="color-wrapper"><input type="color" id="colorP2"></div>
+                </div>
+                <div class="input-group color-group">
+                    <label for="colorP1Ripple">Spieler 1 Ripple Farbe</label>
+                    <div class="color-wrapper"><input type="color" id="colorP1Ripple"></div>
+                </div>
+                <div class="input-group color-group">
+                    <label for="colorP2Ripple">Spieler 2 Ripple Farbe</label>
+                    <div class="color-wrapper"><input type="color" id="colorP2Ripple"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 style="color: #ff4757;">Gefahrenzone</h2>
+                <button type="button" class="reset-btn" onclick="resetHighscore()">60s Highscore zurücksetzen</button>
+            </div>
+
+            <button type="submit" class="save-btn" id="saveBtn">
+                <span id="saveBtnText">Speichern</span>
+            </button>
+        </form>
+    </div>
+    
+    <script src="config.js"></script>
+</body>
+</html>

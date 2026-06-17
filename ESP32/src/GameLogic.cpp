@@ -1,20 +1,12 @@
 #include "GameLogic.h"
 #include <cmath>
+#include "WebLog.h"
 
 // --- Constants for game-process ---
-const uint32_t GAME_DURATION_MS = 60000;
 const uint32_t COOLDOWN_DURATION_MS = 5000;
 const uint32_t IDLE_BLINK_INTERVAL_MS = 500;
 const uint32_t RIPPLE_ANIMATION_DURATION_MS = 150;
 const uint8_t INVALID_TARGET = 99;
-
-// --- Color Config ---
-const uint32_t COLOR_SINGLE_PLAYER = GREEN;
-const uint32_t COLOR_MULTIPLAYER_IDLE = BLUE;
-const uint32_t COLOR_P1 = MAGENTA;
-const uint32_t COLOR_P2 = ORANGE;
-const uint32_t COLOR_P1_RIPPLE = WHITE;
-const uint32_t COLOR_P2_RIPPLE = WHITE;
 
 GameLogic::GameLogic(volatile bool* inputState, LED_Driver& ledDriver)
     : isPressed(inputState), leds(ledDriver) 
@@ -42,11 +34,11 @@ void GameLogic::set_next_target(uint8_t player)
 
     do {
         if (currentMode == SINGLE_PLAYER) {
-            color = COLOR_SINGLE_PLAYER;
+            color = settings.colorSinglePlayer;
             nextField = getRandomGenerator(0, NUM_FIELDS);
         } 
         else {
-            color = (player == 1) ? COLOR_P1 : COLOR_P2;
+            color = (player == 1) ? settings.colorP1 : settings.colorP2;
             
             uint8_t randRow = getRandomGenerator(0, NUM_ROWS); 
 
@@ -84,9 +76,9 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
     if (currentBlinkState != lastBlinkState) {
         for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
         if (currentBlinkState) {
-            leds.set_rgb(COLOR_SINGLE_PLAYER, 0);
-            leds.set_rgb(COLOR_MULTIPLAYER_IDLE, 7);
-            leds.set_rgb(COLOR_MULTIPLAYER_IDLE, 15);
+            leds.set_rgb(settings.colorSinglePlayer, 0);
+            leds.set_rgb(settings.colorMultiplayerIdle, 7);
+            leds.set_rgb(settings.colorMultiplayerIdle, 15);
         }
         lastBlinkState = currentBlinkState;
     }
@@ -131,12 +123,12 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
 
 void GameLogic::handlePlayingState(uint32_t currentTime) {
     if (isGameAbortRequested()) {
-        Serial.println("Spiel vorzeitig abgebrochen!");
+        WebLog.println("Spiel vorzeitig abgebrochen!");
         gameState = GAME_OVER;
         return;
     }
 
-    if (currentTime - gameStartTime >= GAME_DURATION_MS) {
+    if (currentTime - gameStartTime >= settings.gameDurationMs) {
         gameState = GAME_OVER;
         return;
     }
@@ -177,8 +169,8 @@ void GameLogic::handleRippleAnimState(uint32_t currentTime) {
 
         // relight other players target for multiplayer
         if (currentMode == MULTI_PLAYER) {
-            if (playerWhoScored == 1) leds.set_rgb(COLOR_P2, targetP2);
-            else leds.set_rgb(COLOR_P1, targetP1);
+            if (playerWhoScored == 1) leds.set_rgb(settings.colorP2, targetP2);
+            else leds.set_rgb(settings.colorP1, targetP1);
         }
         return;
     }
@@ -187,7 +179,7 @@ void GameLogic::handleRippleAnimState(uint32_t currentTime) {
     float progress = (float)elapsedTime / (float)RIPPLE_ANIMATION_DURATION_MS; // 0.0 thru 1.0
     uint8_t originRow = rippleOriginIndex / NUM_COLUMNS;
     uint8_t originCol = rippleOriginIndex % NUM_COLUMNS;
-    CRGB rippleBaseColor = (playerWhoScored == 1) ? CRGB(COLOR_P1_RIPPLE) : CRGB(COLOR_P2_RIPPLE);
+    CRGB rippleBaseColor = (playerWhoScored == 1) ? CRGB(settings.colorP1Ripple) : CRGB(settings.colorP2Ripple);
     float waveFront = progress * (NUM_COLUMNS / 1.5f); // waveform expanding
 
     for (int i = 0; i < NUM_FIELDS; i++) {
@@ -212,10 +204,10 @@ void GameLogic::handleRippleAnimState(uint32_t currentTime) {
 
 void GameLogic::handleGameOverState(uint32_t currentTime) {
     if (currentMode == SINGLE_PLAYER) {
-        Serial.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
-        highscoreManager.checkAndAdd(scoreP1);
+        WebLog.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
+        highscoreManager.checkAndAdd(scoreP1, settings.gameDurationMs == 60000);
     } else {
-        Serial.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
+        WebLog.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
     }
     
     displayWinnerScreen();
@@ -242,23 +234,32 @@ bool GameLogic::isGameAbortRequested() {
 void GameLogic::displayWinnerScreen() {
     if (currentMode == SINGLE_PLAYER) {
         for (int i = 0; i < NUM_FIELDS; i++) {
-            leds.set_rgb(COLOR_SINGLE_PLAYER, i); 
+            leds.set_rgb(settings.colorSinglePlayer, i); 
         } 
     } else { // multiplayer
         for (int i = 0; i < NUM_FIELDS; i++) {
             uint8_t col = i % NUM_COLUMNS; 
             
             if (scoreP1 > scoreP2) { // P1 wins
-                leds.set_rgb((col < NUM_COLUMNS / 2) ? COLOR_P1 : OFF, i);
+                leds.set_rgb((col < NUM_COLUMNS / 2) ? settings.colorP1 : OFF, i);
             } else if (scoreP2 > scoreP1) { // P2 wins
-                leds.set_rgb((col >= NUM_COLUMNS / 2) ? COLOR_P2 : OFF, i);
+                leds.set_rgb((col >= NUM_COLUMNS / 2) ? settings.colorP2 : OFF, i);
             } else { // tie
-                leds.set_rgb((col < NUM_COLUMNS / 2) ? COLOR_P1 : COLOR_P2, i);
+                leds.set_rgb((col < NUM_COLUMNS / 2) ? settings.colorP1 : settings.colorP2, i);
             }
         }
     }
 }
 
-void GameLogic::updateHighscoreName(const int index, const char* newName) {
-    highscoreManager.updateHighscoreName(index, newName);
+void GameLogic::updateHighscoreName(const int index, const char* newName, bool isDefaultTime) {
+    highscoreManager.updateHighscoreName(index, newName, isDefaultTime);
+}
+
+void GameLogic::applyNewDuration(uint32_t newDuration) {
+    if (settings.gameDurationMs != newDuration) {
+        settings.gameDurationMs = newDuration;
+        if (newDuration != 60000) {
+            highscoreManager.clearDynamicHighscores();
+        }
+    }
 }

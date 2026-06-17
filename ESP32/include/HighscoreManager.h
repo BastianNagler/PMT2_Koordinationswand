@@ -16,14 +16,20 @@ public:
     HighscoreManager() = default;
     
     void load();
-    void checkAndAdd(uint8_t newScore);
-    void updateHighscoreName(const int index, const char* newName);
+    void checkAndAdd(uint8_t newScore, bool isDefaultTime);
+    void updateHighscoreName(const int index, const char* newName, bool isDefaultTime);
     
-    const HighscoreEntry* getHighscores() const { return highscores; }
+    const HighscoreEntry* getHighscores(bool isDefaultTime) const { 
+        return isDefaultTime ? highscores60 : highscoresDynamic; 
+    }
+    
+    void clearDynamicHighscores();
+    void reset60sHighscore();
 
 private:
-    HighscoreEntry highscores[10];
+    HighscoreEntry highscores60[10];
+    HighscoreEntry highscoresDynamic[10];
     int8_t lastNewHighscoreIndex = -1;
 
-    void save();
+    void save60();
 };

@@ -10,7 +10,7 @@
 #include "ioExpander.h"
 #include "heartbeat.h"
 #include "WebInterface.h"
-
+#include "WebLog.h"
 
 volatile bool isPressed[NUM_FIELDS];
 LED_Driver leds;
@@ -36,11 +36,11 @@ void setup()
     // Initialize LittleFS once at startup
     if (!LittleFS.begin(true))
     {
-        Serial.println("[ERROR] LittleFS mounting failed during setup!");
+        WebLog.println("[ERROR] LittleFS mounting failed during setup!");
     }
     else
     {
-        Serial.println("[SUCCESS] LittleFS mounted successfully.");
+        WebLog.println("[SUCCESS] LittleFS mounted successfully.");
     }
 
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
@@ -79,15 +79,15 @@ void inputTask(void *pvParameters)
     while (1) {
         if (!expanders.read(isPressed, NUM_FIELDS))
         {
-            Serial.println("[ERROR] IO-Expander read failed! Resetting MCP23018s...");
+            WebLog.println("[ERROR] IO-Expander read failed! Resetting MCP23018s...");
             heartbeat.setError();
             if (expanders.resetAndReinit())
             {
-                Serial.println("[SUCCESS] MCP23018s reset and re-initialized successfully.");
+                WebLog.println("[SUCCESS] MCP23018s reset and re-initialized successfully.");
             }
             else
             {
-                Serial.println("[ERROR] Failed to re-initialize MCP23018s after reset.");
+                WebLog.println("[ERROR] Failed to re-initialize MCP23018s after reset.");
             }
         }
 

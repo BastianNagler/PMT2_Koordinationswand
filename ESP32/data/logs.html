@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cWall - System Logs</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #d9534f;
+            margin-top: 0;
+        }
+        #log-container {
+            flex-grow: 1;
+            background-color: #000000;
+            border: 1px solid #333;
+            padding: 10px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-radius: 5px;
+        }
+        .log-entry {
+            margin: 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #222;
+        }
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #444;
+        }
+    </style>
+    <script src="logs.js"></script>
+</head>
+<body>
+    <h1>System Logs</h1>
+    <div id="log-container"></div>
+    <div class="controls">
+        <button onclick="clearLogs()">Clear Logs</button>
+        <label style="color: #ccc;"><input type="checkbox" id="auto-scroll" checked> Auto-scroll</label>
+    </div>
+</body>
+</html>

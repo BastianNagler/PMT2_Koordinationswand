@@ -20,6 +20,16 @@
 enum GameState { IDLE, PLAYING, RIPPLE_ANIM, GAME_OVER, COOLDOWN };
 enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
+struct GameSettings {
+    uint32_t gameDurationMs = 60000;
+    uint32_t colorSinglePlayer = GREEN;
+    uint32_t colorMultiplayerIdle = BLUE;
+    uint32_t colorP1 = MAGENTA;
+    uint32_t colorP2 = ORANGE;
+    uint32_t colorP1Ripple = WHITE;
+    uint32_t colorP2Ripple = WHITE;
+};
+
 class GameLogic {
 public:
     GameLogic(volatile bool* inputState, LED_Driver& ledDriver);
@@ -27,13 +37,17 @@ public:
     void init();
     void run(uint32_t currentTime);
     
+    GameSettings settings;
+    
     GameState getGameState() const { return gameState; }
     GameMode getGameMode() const { return currentMode; }
     uint8_t getScoreP1() const { return scoreP1; }
     uint8_t getScoreP2() const { return scoreP2; }
-    const HighscoreEntry* getHighscores() const { return highscoreManager.getHighscores(); }
+    const HighscoreEntry* getHighscores(bool isDefaultTime) const { return highscoreManager.getHighscores(isDefaultTime); }
     
-    void updateHighscoreName(const int index, const char* newName);
+    void updateHighscoreName(const int index, const char* newName, bool isDefaultTime);
+    void applyNewDuration(uint32_t newDuration);
+    void reset60sHighscore() { highscoreManager.reset60sHighscore(); }
 
 private:
     volatile bool* isPressed;
