@@ -62,6 +62,11 @@ void LED_Driver::set_rgb(uint32_t hex, uint8_t index)
 
 void LED_Driver::set_rgb(uint32_t hex, uint8_t row, uint8_t column)
 {
+    if (row >= NUM_ROWS || column >= NUM_COLUMNS)
+    {
+        // Out of bounds, do nothing to prevent memory corruption
+        return;
+    }
     needs_refresh = true;
     frame_buffer[row][column] = CRGB(hex);
 }

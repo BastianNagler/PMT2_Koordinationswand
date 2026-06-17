@@ -133,7 +133,7 @@ void GameLogic::handlePlayingState(uint32_t currentTime) {
     }
 
     // player 1 check hit
-    if (isPressed[targetP1]) {
+    if (targetP1 < NUM_FIELDS && isPressed[targetP1]) {
         scoreP1++;
         leds.set_rgb(OFF, targetP1);
         
@@ -145,7 +145,7 @@ void GameLogic::handlePlayingState(uint32_t currentTime) {
     }
     
     // player 2 check hit (multiplayer only)
-    if (currentMode == MULTI_PLAYER && isPressed[targetP2]) {
+    if (currentMode == MULTI_PLAYER && targetP2 < NUM_FIELDS && isPressed[targetP2]) {
         scoreP2++;
         leds.set_rgb(OFF, targetP2);
 
@@ -225,7 +225,11 @@ void GameLogic::handleCooldownState(uint32_t currentTime) {
 }
 
 bool GameLogic::isGameAbortRequested() {
+#if NUM_FIELDS >= 4
     return isPressed[0] && isPressed[1] && isPressed[2] && isPressed[3];
+#else
+    return false;
+#endif
 }
 
 void GameLogic::displayWinnerScreen() {
