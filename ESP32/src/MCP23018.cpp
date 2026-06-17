@@ -63,7 +63,7 @@ bool MCP23018::init()
     // GPPU: Set Pull-Ups to none
     Wire.write(0x00);
     Wire.write(0x00);
-    uint8_t err = Wire.endTransmission();
+    err = Wire.endTransmission();
     if (err != 0)
     {
         Serial.printf("MCP23018 (0x%02x) configuration failed. Error: %s (%d)\n", i2cAddress, getI2CErrorStr(err), err);
