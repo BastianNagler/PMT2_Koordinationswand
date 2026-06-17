@@ -91,8 +91,12 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
         lastBlinkState = currentBlinkState;
     }
 
-    // check starting conditions (button 0 for singleplayer, button 1 for multiplayer)
-    if (isPressed[0] || isPressed[7] || isPressed[15]) {
+    // check starting conditions (button 0 for singleplayer, button 7 or 15 for multiplayer)
+    bool pressed0 = isPressed[0];
+    bool pressed7 = isPressed[7];
+    bool pressed15 = isPressed[15];
+
+    if (pressed0 || pressed7 || pressed15) {
         // reset game variables
         scoreP1 = 0;
         scoreP2 = 0;
@@ -103,10 +107,10 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
         for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
         
         // set mode and generate first targets
-        if (isPressed[0]) {
+        if (pressed0) {
             currentMode = SINGLE_PLAYER;
             set_next_target(1); 
-        } else if (isPressed[7] || isPressed[15]) {
+        } else if (pressed7 || pressed15) {
             currentMode = MULTI_PLAYER;
             set_next_target(1);
             set_next_target(2);
