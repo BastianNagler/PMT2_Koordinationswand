@@ -40,11 +40,11 @@ private:
     LED_Driver& leds;
     HighscoreManager highscoreManager;
 
-    GameState gameState = IDLE;
-    GameMode currentMode = SINGLE_PLAYER;
+    volatile GameState gameState = IDLE;
+    volatile GameMode currentMode = SINGLE_PLAYER;
 
-    uint8_t scoreP1 = 0;
-    uint8_t scoreP2 = 0;
+    volatile uint8_t scoreP1 = 0;
+    volatile uint8_t scoreP2 = 0;
     uint8_t targetP1 = 99; // INVALID_TARGET 
     uint8_t targetP2 = 99; // INVALID_TARGET
     uint8_t lastP1 = 99;   // INVALID_TARGET

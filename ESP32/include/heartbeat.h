@@ -15,7 +15,7 @@ class HeartbeatLED
 {
 private:
     uint32_t color = 0xFFFF00;
-    bool hasError = false;
+    volatile bool hasError = false;
 
 public:
     /// @brief Updates the Heartbeat LED based on system status

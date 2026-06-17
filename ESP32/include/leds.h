@@ -19,7 +19,7 @@ class LED_Driver
 private: 
     CRGB frame_buffer[NUM_ROWS][NUM_COLUMNS];
     CRGB physical_frame_buffer[NUM_ROWS][NUM_COLUMNS][NUM_LEDS_PER_FIELD];
-    bool needs_refresh = true;
+    volatile bool needs_refresh = true;
 
     /// @brief expands the frame_buffer to the physical_frame_buffer 
     void expand();
