@@ -123,24 +123,18 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
 
 void GameLogic::handleStartAnimState(uint32_t currentTime) {
     uint32_t elapsed = currentTime - startAnimStartTime;
+    uint32_t intervalMs = 500;
+    uint32_t maxElapsed = NUM_ROWS * intervalMs;
 
-    if (elapsed < 1000) {
-        // First row Red
-        for (int i = 0; i < NUM_COLUMNS; i++) leds.set_rgb(RED, i);
-    } else if (elapsed < 2000) {
-        // First row Red
-        for (int i = 0; i < NUM_COLUMNS; i++) leds.set_rgb(RED, i);
-        // Middle rows Orange
-        for (int r = 1; r < NUM_ROWS - 1; r++) {
-            for (int c = 0; c < NUM_COLUMNS; c++) leds.set_rgb(ORANGE, r * NUM_COLUMNS + c);
+    if (elapsed < maxElapsed) {
+        uint32_t rowsToLight = (elapsed / intervalMs) + 1;
+        if (rowsToLight > NUM_ROWS) rowsToLight = NUM_ROWS;
+        
+        for (int r = 0; r < rowsToLight; r++) {
+            for (int c = 0; c < NUM_COLUMNS; c++) {
+                leds.set_rgb(settings.colorStartAnim, r * NUM_COLUMNS + c);
+            }
         }
-    } else if (elapsed < 3000) {
-        for (int i = 0; i < NUM_COLUMNS; i++) leds.set_rgb(RED, i);
-        for (int r = 1; r < NUM_ROWS - 1; r++) {
-            for (int c = 0; c < NUM_COLUMNS; c++) leds.set_rgb(ORANGE, r * NUM_COLUMNS + c);
-        }
-        // Last row Green
-        for (int c = 0; c < NUM_COLUMNS; c++) leds.set_rgb(GREEN, (NUM_ROWS - 1) * NUM_COLUMNS + c);
     } else {
         // Animation done
         for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);

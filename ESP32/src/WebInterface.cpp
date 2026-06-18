@@ -69,6 +69,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
                     JsonDocument configDoc;
                     configDoc["action"] = "config_data";
                     configDoc["gameDurationMs"] = gameInstance.settings.gameDurationMs;
+                    configDoc["colorStartAnim"] = formatHexColor(gameInstance.settings.colorStartAnim);
                     configDoc["colorP1"] = formatHexColor(gameInstance.settings.colorP1);
                     configDoc["colorP2"] = formatHexColor(gameInstance.settings.colorP2);
                     configDoc["colorP1Ripple"] = formatHexColor(gameInstance.settings.colorP1Ripple);
@@ -79,6 +80,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
                     client->text(output);
                 } else if (doc["action"] == "set_config") {
                     if (!doc["gameDurationMs"].isNull()) gameInstance.applyNewDuration(doc["gameDurationMs"]);
+                    if (!doc["colorStartAnim"].isNull()) gameInstance.settings.colorStartAnim = parseHexColor(doc["colorStartAnim"]);
                     if (!doc["colorP1"].isNull()) gameInstance.settings.colorP1 = parseHexColor(doc["colorP1"]);
                     if (!doc["colorP2"].isNull()) gameInstance.settings.colorP2 = parseHexColor(doc["colorP2"]);
                     if (!doc["colorP1Ripple"].isNull()) gameInstance.settings.colorP1Ripple = parseHexColor(doc["colorP1Ripple"]);
