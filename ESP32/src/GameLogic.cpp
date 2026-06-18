@@ -160,7 +160,7 @@ void GameLogic::handleStartAnimState(uint32_t currentTime) {
 
 void GameLogic::handlePlayingState(uint32_t currentTime) {
     if (isGameAbortRequested()) {
-        WebLog.println("Spiel vorzeitig abgebrochen!");
+        WebLog.println("[GAME] Game cancelled!");
         gameState = GAME_OVER;
         return;
     }
@@ -241,10 +241,10 @@ void GameLogic::handleRippleAnimState(uint32_t currentTime) {
 
 void GameLogic::handleGameOverState(uint32_t currentTime) {
     if (currentMode == SINGLE_PLAYER) {
-        WebLog.printf("Zeit abgelaufen! Score: %d\n", scoreP1);
+        WebLog.printf("[GAME] Time over! Score: %d\n", scoreP1);
         highscoreManager.checkAndAdd(scoreP1, settings.gameDurationMs == 60000);
     } else {
-        WebLog.printf("Zeit abgelaufen! P1: %d | P2: %d\n", scoreP1, scoreP2);
+        WebLog.printf("[GAME] Time over! P1: %d | P2: %d\n", scoreP1, scoreP2);
     }
     
     displayWinnerScreen();

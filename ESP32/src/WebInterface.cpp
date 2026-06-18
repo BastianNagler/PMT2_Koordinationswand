@@ -37,10 +37,16 @@ static uint32_t parseHexColor(const char* hexStr) {
 
 // --- Empfangen von Nachrichten vom Browser ---
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
-    if (type == WS_EVT_DATA) {
+    if (type == WS_EVT_CONNECT) {
+        WebLog.printf("[WEBSOCKET] Client connected (ID: %u, IP: %s)\n", client->id(), client->remoteIP().toString().c_str());
+    } else if (type == WS_EVT_DISCONNECT) {
+        WebLog.printf("[WEBSOCKET] Client disconnected (ID: %u)\n", client->id());
+    } else if (type == WS_EVT_ERROR) {
+        WebLog.printf("[WEBSOCKET] Error on client %u\n", client->id());
+    } else if (type == WS_EVT_DATA) {
         AwsFrameInfo *info = (AwsFrameInfo*)arg;
         if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-            WebLog.printf("WebSocket empfangen (Länge: %u)\n", len);
+            WebLog.printf("[WEB] Received websocket (length: %u)\n", len);
             
             // JSON auspacken
             JsonDocument doc;
@@ -77,13 +83,13 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
                     if (!doc["colorP2"].isNull()) gameInstance.settings.colorP2 = parseHexColor(doc["colorP2"]);
                     if (!doc["colorP1Ripple"].isNull()) gameInstance.settings.colorP1Ripple = parseHexColor(doc["colorP1Ripple"]);
                     if (!doc["colorP2Ripple"].isNull()) gameInstance.settings.colorP2Ripple = parseHexColor(doc["colorP2Ripple"]);
-                    WebLog.println("Neue Konfiguration via WebSocket empfangen und angewendet.");
+                    WebLog.println("[WEB] Received and applied new config.");
                 } else if (doc["action"] == "reset_highscore") {
                     gameInstance.reset60sHighscore();
                     notifyGameOver(); // Broadcast the empty list
                 }
             } else {
-                WebLog.println("Fehler beim Parsen der JSON-Nachricht");
+                WebLog.println("[ERROR] Error when parsing the JSON-Message");
             }
         }
     }
@@ -93,14 +99,14 @@ void initWebInterface() {
     WebLog.setWebSocket(&ws);
 
     if (!LittleFS.exists("/index.html")) {
-        WebLog.println("HTML-File nicht gefunden");
+        WebLog.println("[ERROR] HTML-File not found");
         return;
     }
     
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(localIP, localGW, localSN);
     WiFi.softAP(ssid, password);
-    WebLog.print("WLAN Access Point gestartet. IP-Adresse: ");
+    WebLog.print("[WEB] WiFi Access Point initialized. IP-Adress: ");
     WebLog.println(WiFi.softAPIP());
 
     ws.onEvent(onEvent);
@@ -125,7 +131,7 @@ void initWebInterface() {
     });
 
     server.begin();
-    WebLog.println("Webserver gestartet.");
+    WebLog.println("[WEB] Webserver initialized.");
 }
 
 void cleanupWebInterface() {

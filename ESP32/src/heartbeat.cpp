@@ -1,4 +1,5 @@
 #include "heartbeat.h"
+#include "WebLog.h"
 
 void HeartbeatLED::update()
 {
@@ -17,5 +18,6 @@ void HeartbeatLED::update()
 
 void HeartbeatLED::setError()
 {
+    WebLog.println("[HEARTBEAT] set error");
     hasError = true;
 }

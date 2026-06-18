@@ -12,9 +12,9 @@ void HighscoreManager::load() {
             size_t bytesRead = file.read((uint8_t*)highscores60, sizeof(highscores60));
             file.close();
             if (bytesRead == sizeof(highscores60)) {
-                WebLog.println("Highscores aus LittleFS geladen.");
+                WebLog.println("[HIGHSCORE] Loaded highscores from LittleFS.");
             } else {
-                WebLog.println("Highscore-Datei unvollständig oder beschädigt. Initialisiere neu...");
+                WebLog.println("[HIGHSCORE] Highscore-file corrputed, reinitialize...");
                 for (int i = 0; i < 10; i++) {
                     highscores60[i].score = 0;
                     strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
@@ -22,7 +22,7 @@ void HighscoreManager::load() {
             }
         }
     } else {
-        WebLog.println("Keine Highscore-Datei gefunden, initialisiere neu...");
+        WebLog.println("[HIGHSCORE] No highscore-file found, reinitialize...");
         for (int i = 0; i < 10; i++) {
             highscores60[i].score = 0;
             strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
@@ -51,7 +51,7 @@ void HighscoreManager::reset60sHighscore() {
         strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
     }
     save60();
-    WebLog.println("60s-Highscore wurde erfolgreich zurückgesetzt.");
+    WebLog.println("[HIGHSCORE] Successfully reseted 60s-highscores.");
 }
 
 void HighscoreManager::save60() {
@@ -61,7 +61,7 @@ void HighscoreManager::save60() {
         file.write((uint8_t*)highscores60, sizeof(highscores60));
         file.close();
     } else {
-        WebLog.println("Fehler beim Speichern der Highscores in LittleFS.");
+        WebLog.println("[ERROR] Error when saving highscores in LittleFS.");
     }
 }
 
@@ -96,7 +96,7 @@ void HighscoreManager::checkAndAdd(uint8_t newScore, bool isDefaultTime) {
     if (isDefaultTime) {
         save60();
     }
-    WebLog.printf("Neuer Highscore auf Platz %d gespeichert!\n", insertPos + 1);
+    WebLog.printf("[HIGHSCORE] Saved new highscore at rank %d!\n", insertPos + 1);
 }
 
 void HighscoreManager::updateHighscoreName(const int index, const char *newName, bool isDefaultTime)
@@ -115,7 +115,7 @@ void HighscoreManager::updateHighscoreName(const int index, const char *newName,
     if (isDefaultTime) {
         save60();
     }
-    WebLog.printf("Name für Platz %d aktualisiert: %s\n", index + 1, newName);
+    WebLog.printf("[HIGHSCORE] refreshed name for rank %d: %s\n", index + 1, newName);
 }
 
 std::array<HighscoreEntry, 10> HighscoreManager::getHighscoresCopy(bool isDefaultTime) const {

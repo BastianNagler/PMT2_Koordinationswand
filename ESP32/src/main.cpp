@@ -40,7 +40,7 @@ void setup()
     }
     else
     {
-        WebLog.println("[SUCCESS] LittleFS mounted successfully.");
+        WebLog.println("[SETUP] LittleFS mounted successfully.");
     }
 
     // Recover the I2C bus if stuck before starting communication
@@ -86,7 +86,7 @@ void inputTask(void *pvParameters)
             heartbeat.setError();
             if (expanders.resetAndReinit())
             {
-                WebLog.println("[SUCCESS] MCP23018s reset and re-initialized successfully.");
+                WebLog.println("[IO-EXPANDER] MCP23018s reset and re-initialized successfully.");
             }
             else
             {
