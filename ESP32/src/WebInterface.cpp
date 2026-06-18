@@ -35,10 +35,61 @@ static uint32_t parseHexColor(const char* hexStr) {
     return (uint32_t)strtoul(hexStr, NULL, 16);
 }
 
+void sendStateToClient(AsyncWebSocketClient *client) {
+    GameState state = gameInstance.getGameState();
+    if (state == PLAYING || state == START_ANIM || state == RIPPLE_ANIM) {
+        JsonDocument docStart;
+        docStart["action"] = "start game";
+        docStart["mode"] = (gameInstance.getGameMode() == SINGLE_PLAYER) ? "single" : "multi";
+        
+        uint32_t elapsed = 0;
+        if (state == PLAYING || state == RIPPLE_ANIM) {
+            elapsed = millis() - gameInstance.getGameStartTime();
+        }
+        uint32_t duration = gameInstance.settings.gameDurationMs;
+        uint32_t remaining = (duration > elapsed) ? (duration - elapsed) : 0;
+        
+        docStart["durationMs"] = remaining;
+        
+        String outputStart;
+        serializeJson(docStart, outputStart);
+        client->text(outputStart);
+
+        JsonDocument docScore;
+        docScore["action"] = "update counter";
+        docScore["scoreP1"] = gameInstance.getScoreP1();
+        docScore["scoreP2"] = gameInstance.getScoreP2();
+        docScore["counterValue"] = gameInstance.getScoreP1();
+        
+        String outputScore;
+        serializeJson(docScore, outputScore);
+        client->text(outputScore);
+    } else {
+        JsonDocument doc;
+        doc["action"] = "end of game";
+        doc["finalScoreP1"] = gameInstance.getScoreP1();
+        doc["finalScoreP2"] = gameInstance.getScoreP2();
+        doc["isDefaultTime"] = (gameInstance.settings.gameDurationMs == 60000);
+        
+        std::array<HighscoreEntry, 10> highscores = gameInstance.getHighscoresCopy(gameInstance.settings.gameDurationMs == 60000);
+        JsonArray hsArray = doc["highscoreList"].to<JsonArray>();
+        for(int i=0; i<10; i++) {
+            JsonObject player = hsArray.add<JsonObject>();
+            player["playerName"] = highscores[i].name;
+            player["counterValue"] = highscores[i].score;
+        }
+        
+        String output;
+        serializeJson(doc, output);
+        client->text(output);
+    }
+}
+
 // --- Empfangen von Nachrichten vom Browser ---
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
     if (type == WS_EVT_CONNECT) {
         WebLog.printf("[WEBSOCKET] Client connected (ID: %u, IP: %s)\n", client->id(), client->remoteIP().toString().c_str());
+        sendStateToClient(client);
     } else if (type == WS_EVT_DISCONNECT) {
         WebLog.printf("[WEBSOCKET] Client disconnected (ID: %u)\n", client->id());
     } else if (type == WS_EVT_ERROR) {

@@ -44,6 +44,7 @@ public:
   GameMode getGameMode() const { return currentMode; }
   uint8_t getScoreP1() const { return scoreP1; }
   uint8_t getScoreP2() const { return scoreP2; }
+  uint32_t getGameStartTime() const { return gameStartTime; }
   std::array<HighscoreEntry, 10> getHighscoresCopy(bool isDefaultTime) const {
     return highscoreManager.getHighscoresCopy(isDefaultTime);
   }
