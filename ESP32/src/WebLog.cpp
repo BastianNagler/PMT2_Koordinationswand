@@ -8,13 +8,19 @@ WebLogClass::WebLogClass() : _ws(nullptr) {
 }
 
 void WebLogClass::setWebSocket(AsyncWebSocket* ws) {
-    std::lock_guard<std::mutex> lock(mtx);
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     _ws = ws;
 }
 
 size_t WebLogClass::write(uint8_t c) {
-    std::lock_guard<std::mutex> lock(mtx);
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     Serial.write(c);
+    if (currentLine.length() == 0) {
+        uint32_t ms = millis();
+        char timeBuf[16];
+        snprintf(timeBuf, sizeof(timeBuf), "[%6lu.%03lu] ", (unsigned long)(ms / 1000), (unsigned long)(ms % 1000));
+        currentLine += timeBuf;
+    }
     currentLine += (char)c;
     if (c == '\n') {
         addLineToBuffer(currentLine);
@@ -25,9 +31,15 @@ size_t WebLogClass::write(uint8_t c) {
 }
 
 size_t WebLogClass::write(const uint8_t *buffer, size_t size) {
-    std::lock_guard<std::mutex> lock(mtx);
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     Serial.write(buffer, size);
     for (size_t i = 0; i < size; i++) {
+        if (currentLine.length() == 0) {
+            uint32_t ms = millis();
+            char timeBuf[16];
+            snprintf(timeBuf, sizeof(timeBuf), "[%6lu.%03lu] ", (unsigned long)(ms / 1000), (unsigned long)(ms % 1000));
+            currentLine += timeBuf;
+        }
         currentLine += (char)buffer[i];
         if (buffer[i] == '\n') {
             addLineToBuffer(currentLine);
@@ -62,7 +74,7 @@ void WebLogClass::broadcastLog(const String& msg) {
 }
 
 String WebLogClass::getLogsJson() {
-    std::lock_guard<std::mutex> lock(mtx);
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     JsonDocument doc;
     doc["action"] = "log_history";
     JsonArray arr = doc["logs"].to<JsonArray>();

@@ -8,7 +8,7 @@ function onload(event) {
 }
 
 function initWebSocket() {
-    console.log('Verbinde mit WebSocket...');
+    console.log('Connect to WebSocket...');
     websocket = new WebSocket(gateway);
     websocket.onopen = onOpen;
     websocket.onclose = onClose;
@@ -16,15 +16,15 @@ function initWebSocket() {
 }
 
 function onOpen(event) {
-    console.log('Verbindung hergestellt');
-    addLogLine("--- Verbunden mit cWall ---");
+    console.log('Connection established');
+    addLogLine("--- Connected to cWall ---");
     // Request log history
     websocket.send(JSON.stringify({ action: "get_logs" }));
 }
 
 function onClose(event) {
-    console.log('Verbindung getrennt. Versuche Neuverbindung...');
-    addLogLine("--- Verbindung getrennt, versuche Neuverbindung... ---");
+    console.log('Connection closed. Attempting to reconnect...');
+    addLogLine("--- Connection closed, attempting to reconnect... ---");
     setTimeout(initWebSocket, 2000);
 }
 
@@ -37,10 +37,12 @@ function onMessage(event) {
                 addLogLine(myObj.message);
             } else if (myObj.action === "log_history") {
                 if (myObj.logs && Array.isArray(myObj.logs)) {
+                    clearLogs();
+                    addLogLine("--- Connected to cWall ---");
                     myObj.logs.forEach(function(log) {
                         addLogLine(log);
                     });
-                    addLogLine("--- Ende der Historie ---");
+                    addLogLine("--- End of History ---");
                 }
             }
         }

@@ -13,7 +13,7 @@ private:
     std::vector<String> logBuffer;
     String currentLine;
     AsyncWebSocket* _ws;
-    std::mutex mtx;
+    std::recursive_mutex mtx;
 
     void broadcastLog(const String& msg);
     void addLineToBuffer(const String& line);
