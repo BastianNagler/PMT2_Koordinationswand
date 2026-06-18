@@ -22,12 +22,10 @@ enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
 struct GameSettings {
     uint32_t gameDurationMs = 60000;
-    uint32_t colorSinglePlayer = GREEN;
-    uint32_t colorMultiplayerIdle = BLUE;
-    uint32_t colorP1 = MAGENTA;
-    uint32_t colorP2 = ORANGE;
-    uint32_t colorP1Ripple = WHITE;
-    uint32_t colorP2Ripple = WHITE;
+    uint32_t colorP1 = RED;
+    uint32_t colorP2 = BLUE;
+    uint32_t colorP1Ripple = 0x00808080;
+    uint32_t colorP2Ripple = 0x00808080;
 };
 
 class GameLogic {

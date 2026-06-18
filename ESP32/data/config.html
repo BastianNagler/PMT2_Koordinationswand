@@ -23,21 +23,9 @@
             </div>
 
             <div class="section">
-                <h2>Singleplayer</h2>
+                <h2>Farbeinstellungen</h2>
                 <div class="input-group color-group">
-                    <label for="colorSinglePlayer">Spielfarbe</label>
-                    <div class="color-wrapper"><input type="color" id="colorSinglePlayer"></div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Multiplayer</h2>
-                <div class="input-group color-group">
-                    <label for="colorMultiplayerIdle">Idle Farbe</label>
-                    <div class="color-wrapper"><input type="color" id="colorMultiplayerIdle"></div>
-                </div>
-                <div class="input-group color-group">
-                    <label for="colorP1">Spieler 1 Farbe</label>
+                    <label for="colorP1">Spieler 1 & Singleplayer Farbe</label>
                     <div class="color-wrapper"><input type="color" id="colorP1"></div>
                 </div>
                 <div class="input-group color-group">
@@ -45,7 +33,7 @@
                     <div class="color-wrapper"><input type="color" id="colorP2"></div>
                 </div>
                 <div class="input-group color-group">
-                    <label for="colorP1Ripple">Spieler 1 Ripple Farbe</label>
+                    <label for="colorP1Ripple">Spieler 1 & Singleplayer Ripple Farbe</label>
                     <div class="color-wrapper"><input type="color" id="colorP1Ripple"></div>
                 </div>
                 <div class="input-group color-group">
@@ -54,15 +42,22 @@
                 </div>
             </div>
 
-            <div class="section">
-                <h2 style="color: #ff4757;">Gefahrenzone</h2>
-                <button type="button" class="reset-btn" onclick="resetHighscore()">60s Highscore zurücksetzen</button>
-            </div>
-
             <button type="submit" class="save-btn" id="saveBtn">
                 <span id="saveBtnText">Speichern</span>
             </button>
         </form>
+
+        <div class="section" style="margin-top: 40px;">
+            <h2 style="color: #ff4757;">Gefahrenzone</h2>
+            <button type="button" class="reset-btn" id="resetBtn" onclick="showResetConfirm()">60s Highscore zurücksetzen</button>
+            <div id="resetConfirmField" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ff4757; border-radius: 8px; background: rgba(255, 71, 87, 0.1);">
+                <p style="color: #ff4757; margin-top: 0; margin-bottom: 15px; text-align: center; font-weight: bold;">Möchten Sie wirklich alle Highscores löschen?</p>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="reset-btn" style="flex: 1; background: #ff4757; color: white;" onclick="confirmReset(true)">Ja</button>
+                    <button type="button" class="back-btn" style="flex: 1; text-align: center; width: 100%;" onclick="confirmReset(false)">Nein</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script src="config.js"></script>

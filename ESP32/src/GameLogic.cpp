@@ -34,7 +34,7 @@ void GameLogic::set_next_target(uint8_t player)
 
     do {
         if (currentMode == SINGLE_PLAYER) {
-            color = settings.colorSinglePlayer;
+            color = settings.colorP1;
             nextField = getRandomGenerator(0, NUM_FIELDS);
         } 
         else {
@@ -76,9 +76,9 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
     if (currentBlinkState != lastBlinkState) {
         for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
         if (currentBlinkState) {
-            leds.set_rgb(settings.colorSinglePlayer, 0);
-            leds.set_rgb(settings.colorMultiplayerIdle, 7);
-            leds.set_rgb(settings.colorMultiplayerIdle, 15);
+            leds.set_rgb(settings.colorP1, 0);
+            leds.set_rgb(settings.colorP2, 7);
+            leds.set_rgb(settings.colorP2, 15);
         }
         lastBlinkState = currentBlinkState;
     }
@@ -236,7 +236,7 @@ bool GameLogic::isGameAbortRequested() {
 void GameLogic::displayWinnerScreen() {
     if (currentMode == SINGLE_PLAYER) {
         for (int i = 0; i < NUM_FIELDS; i++) {
-            leds.set_rgb(settings.colorSinglePlayer, i); 
+            leds.set_rgb(settings.colorP1, i); 
         } 
     } else { // multiplayer
         for (int i = 0; i < NUM_FIELDS; i++) {
