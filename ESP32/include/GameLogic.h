@@ -17,7 +17,7 @@
 #define GRAY    0x00AAAAAA
 #define OFF     0x00000000
 
-enum GameState { IDLE, PLAYING, RIPPLE_ANIM, GAME_OVER, COOLDOWN };
+enum GameState { IDLE, START_ANIM, PLAYING, RIPPLE_ANIM, GAME_OVER, COOLDOWN };
 enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
 struct GameSettings {
@@ -63,6 +63,7 @@ private:
     uint8_t lastP2 = 99;   // INVALID_TARGET
     uint32_t cooldownStartTime = 0;
 
+    uint32_t startAnimStartTime = 0;
     uint32_t animationStartTime = 0;
     uint8_t rippleOriginIndex = 0;
     uint8_t playerWhoScored = 0; 
@@ -71,6 +72,7 @@ private:
     uint8_t getRandomGenerator(uint8_t min, uint8_t max);
     void set_next_target(uint8_t player);
     void handleIdleState(uint32_t currentTime);
+    void handleStartAnimState(uint32_t currentTime);
     void handlePlayingState(uint32_t currentTime);
     void handleRippleAnimState(uint32_t currentTime);
     void handleGameOverState(uint32_t currentTime);

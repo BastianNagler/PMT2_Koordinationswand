@@ -62,6 +62,7 @@ void GameLogic::set_next_target(uint8_t player)
 void GameLogic::run(uint32_t currentTime) {    
     switch (gameState) {
         case IDLE:        handleIdleState(currentTime);       break;
+        case START_ANIM:  handleStartAnimState(currentTime);  break;
         case PLAYING:     handlePlayingState(currentTime);    break;
         case RIPPLE_ANIM: handleRippleAnimState(currentTime); break;
         case GAME_OVER:   handleGameOverState(currentTime);   break;
@@ -94,16 +95,14 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
         scoreP2 = 0;
         lastP1 = INVALID_TARGET; 
         lastP2 = INVALID_TARGET;
-        gameStartTime = currentTime;
         
         for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
         
-        // set mode and generate first targets
+        // set mode
         if (pressed0) {
             currentMode = SINGLE_PLAYER;
             lastP1 = 0; // Prevent first target on start button
             WebLog.println("[GAME] Start Singleplayer (triggered by button 0)");
-            set_next_target(1); 
         } else if (pressed7 || pressed15) {
             currentMode = MULTI_PLAYER;
             WebLog.printf("[GAME] Start Multiplayer (triggered by button %d)\n", pressed7 ? 7 : 15);
@@ -115,6 +114,42 @@ void GameLogic::handleIdleState(uint32_t currentTime) {
             {
                 lastP2 = 15;
             }
+        }
+        
+        startAnimStartTime = currentTime;
+        gameState = START_ANIM;
+    }
+}
+
+void GameLogic::handleStartAnimState(uint32_t currentTime) {
+    uint32_t elapsed = currentTime - startAnimStartTime;
+
+    if (elapsed < 1000) {
+        // First row Red
+        for (int i = 0; i < NUM_COLUMNS; i++) leds.set_rgb(RED, i);
+    } else if (elapsed < 2000) {
+        // First row Red
+        for (int i = 0; i < NUM_COLUMNS; i++) leds.set_rgb(RED, i);
+        // Middle rows Orange
+        for (int r = 1; r < NUM_ROWS - 1; r++) {
+            for (int c = 0; c < NUM_COLUMNS; c++) leds.set_rgb(ORANGE, r * NUM_COLUMNS + c);
+        }
+    } else if (elapsed < 3000) {
+        for (int i = 0; i < NUM_COLUMNS; i++) leds.set_rgb(RED, i);
+        for (int r = 1; r < NUM_ROWS - 1; r++) {
+            for (int c = 0; c < NUM_COLUMNS; c++) leds.set_rgb(ORANGE, r * NUM_COLUMNS + c);
+        }
+        // Last row Green
+        for (int c = 0; c < NUM_COLUMNS; c++) leds.set_rgb(GREEN, (NUM_ROWS - 1) * NUM_COLUMNS + c);
+    } else {
+        // Animation done
+        for (int i = 0; i < NUM_FIELDS; i++) leds.set_rgb(OFF, i);
+        
+        gameStartTime = currentTime;
+        
+        if (currentMode == SINGLE_PLAYER) {
+            set_next_target(1); 
+        } else {
             set_next_target(1);
             set_next_target(2);
         }
