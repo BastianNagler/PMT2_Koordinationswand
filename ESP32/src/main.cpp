@@ -28,40 +28,6 @@ void custom_panic_handler(arduino_panic_info_t *info, void *arg) {
     ws2812Write(HEARTBEAT_LED_PIN, 0x00FF00); 
 }
 
-void recoverI2CBus(uint8_t sdaPin, uint8_t sclPin) {
-    pinMode(sdaPin, INPUT_PULLUP);
-    pinMode(sclPin, OUTPUT);
-    digitalWrite(sclPin, HIGH);
-    delay(1);
-
-    if (digitalRead(sdaPin) == LOW) {
-        WebLog.println("[I2C] SDA is stuck LOW! Attempting bus recovery...");
-        for (int i = 0; i < 9; i++) {
-            digitalWrite(sclPin, LOW);
-            delayMicroseconds(5);
-            digitalWrite(sclPin, HIGH);
-            delayMicroseconds(5);
-            if (digitalRead(sdaPin) == HIGH) {
-                WebLog.printf("[I2C] SDA released after %d clock pulses.\n", i + 1);
-                break;
-            }
-        }
-    }
-
-    // Generate a STOP condition to reset the bus state
-    pinMode(sdaPin, OUTPUT);
-    digitalWrite(sdaPin, LOW);
-    delayMicroseconds(5);
-    digitalWrite(sclPin, HIGH);
-    delayMicroseconds(5);
-    digitalWrite(sdaPin, HIGH);
-    delayMicroseconds(5);
-
-    // Set pins back to high-impedance
-    pinMode(sdaPin, INPUT);
-    pinMode(sclPin, INPUT);
-}
-
 void setup()
 {
     delay(500);
@@ -85,11 +51,11 @@ void setup()
 
     set_arduino_panic_handler(custom_panic_handler, NULL);
 
-    xTaskCreate(ledTask, "LED Task", 8192, NULL, 4, NULL);
-    xTaskCreatePinnedToCore(inputTask, "Input Task", 8192, NULL, 3, NULL, 1);
-    xTaskCreate(gameTask, "Game Task", 8192, NULL, 2, NULL);
-    xTaskCreate(webTask, "Web Task", 32768, NULL, 1, NULL);
-    xTaskCreate(heartbeatTask, "Heartbeat Task", 8192, NULL, 0, NULL);
+    xTaskCreate(ledTask, "LED Task", 4096, NULL, 4, NULL);
+    xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, NULL, 3, NULL, 1);
+    xTaskCreate(gameTask, "Game Task", 4096, NULL, 2, NULL);
+    xTaskCreate(webTask, "Web Task", 8192, NULL, 1, NULL);
+    xTaskCreate(heartbeatTask, "Heartbeat Task", 2048, NULL, 0, NULL);
     vTaskDelete(NULL);
 }
 

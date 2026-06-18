@@ -8,10 +8,12 @@ WebLogClass::WebLogClass() : _ws(nullptr) {
 }
 
 void WebLogClass::setWebSocket(AsyncWebSocket* ws) {
+    std::lock_guard<std::mutex> lock(mtx);
     _ws = ws;
 }
 
 size_t WebLogClass::write(uint8_t c) {
+    std::lock_guard<std::mutex> lock(mtx);
     Serial.write(c);
     currentLine += (char)c;
     if (c == '\n') {
@@ -23,6 +25,7 @@ size_t WebLogClass::write(uint8_t c) {
 }
 
 size_t WebLogClass::write(const uint8_t *buffer, size_t size) {
+    std::lock_guard<std::mutex> lock(mtx);
     Serial.write(buffer, size);
     for (size_t i = 0; i < size; i++) {
         currentLine += (char)buffer[i];
@@ -59,6 +62,7 @@ void WebLogClass::broadcastLog(const String& msg) {
 }
 
 String WebLogClass::getLogsJson() {
+    std::lock_guard<std::mutex> lock(mtx);
     JsonDocument doc;
     doc["action"] = "log_history";
     JsonArray arr = doc["logs"].to<JsonArray>();

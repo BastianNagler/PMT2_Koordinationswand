@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <ESPAsyncWebServer.h>
+#include <mutex>
 
 #define MAX_LOG_LINES 50
 
@@ -12,6 +13,7 @@ private:
     std::vector<String> logBuffer;
     String currentLine;
     AsyncWebSocket* _ws;
+    std::mutex mtx;
 
     void broadcastLog(const String& msg);
     void addLineToBuffer(const String& line);

@@ -4,6 +4,7 @@
 #include "config.h"
 #include "leds.h"
 #include "HighscoreManager.h"
+#include <array>
 
 #define RED     0x00FF0000
 #define GREEN   0x0000FF00
@@ -21,11 +22,11 @@ enum GameState { IDLE, START_ANIM, PLAYING, RIPPLE_ANIM, GAME_OVER, COOLDOWN };
 enum GameMode { SINGLE_PLAYER, MULTI_PLAYER };
 
 struct GameSettings {
-    uint32_t gameDurationMs = 60000;
-    uint32_t colorP1 = RED;
-    uint32_t colorP2 = BLUE;
-    uint32_t colorP1Ripple = 0x00808080;
-    uint32_t colorP2Ripple = 0x00808080;
+    volatile uint32_t gameDurationMs = 60000;
+    volatile uint32_t colorP1 = RED;
+    volatile uint32_t colorP2 = BLUE;
+    volatile uint32_t colorP1Ripple = 0x00808080;
+    volatile uint32_t colorP2Ripple = 0x00808080;
 };
 
 class GameLogic {
@@ -41,12 +42,14 @@ public:
     GameMode getGameMode() const { return currentMode; }
     uint8_t getScoreP1() const { return scoreP1; }
     uint8_t getScoreP2() const { return scoreP2; }
-    const HighscoreEntry* getHighscores(bool isDefaultTime) const { return highscoreManager.getHighscores(isDefaultTime); }
+    std::array<HighscoreEntry, 10> getHighscoresCopy(bool isDefaultTime) const { 
+        return highscoreManager.getHighscoresCopy(isDefaultTime); 
+    }
     
     void updateHighscoreName(const int index, const char* newName, bool isDefaultTime);
     void applyNewDuration(uint32_t newDuration);
     void reset60sHighscore() { highscoreManager.reset60sHighscore(); }
-
+ 
 private:
     volatile bool* isPressed;
     LED_Driver& leds;

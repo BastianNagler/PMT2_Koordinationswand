@@ -5,6 +5,7 @@
 const char* HIGHSCORE_PLACEHOLDER_NAME = "Insert Name";
 
 void HighscoreManager::load() {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     if (LittleFS.exists("/highscores.dat")) {
         File file = LittleFS.open("/highscores.dat", "r");
         if (file) {
@@ -36,6 +37,7 @@ void HighscoreManager::load() {
 }
 
 void HighscoreManager::clearDynamicHighscores() {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     for (int i = 0; i < 10; i++) {
         highscoresDynamic[i].score = 0;
         strlcpy(highscoresDynamic[i].name, "---", MAX_NAME_LEN);
@@ -43,6 +45,7 @@ void HighscoreManager::clearDynamicHighscores() {
 }
 
 void HighscoreManager::reset60sHighscore() {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     for (int i = 0; i < 10; i++) {
         highscores60[i].score = 0;
         strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
@@ -52,6 +55,7 @@ void HighscoreManager::reset60sHighscore() {
 }
 
 void HighscoreManager::save60() {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     File file = LittleFS.open("/highscores.dat", "w");
     if (file) {
         file.write((uint8_t*)highscores60, sizeof(highscores60));
@@ -62,6 +66,7 @@ void HighscoreManager::save60() {
 }
 
 void HighscoreManager::checkAndAdd(uint8_t newScore, bool isDefaultTime) {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
     lastNewHighscoreIndex = -1; // Reset
     HighscoreEntry* targetList = isDefaultTime ? highscores60 : highscoresDynamic;
     
@@ -96,10 +101,29 @@ void HighscoreManager::checkAndAdd(uint8_t newScore, bool isDefaultTime) {
 
 void HighscoreManager::updateHighscoreName(const int index, const char *newName, bool isDefaultTime)
 {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    if (index < 0 || index >= 10) {
+        WebLog.printf("[ERROR] Highscore name update failed: index %d out of bounds!\n", index);
+        return;
+    }
+    if (newName == nullptr) {
+        WebLog.println("[ERROR] Highscore name update failed: newName is null!");
+        return;
+    }
     HighscoreEntry* targetList = isDefaultTime ? highscores60 : highscoresDynamic;
     strlcpy(targetList[index].name, newName, MAX_NAME_LEN);
     if (isDefaultTime) {
         save60();
     }
     WebLog.printf("Name für Platz %d aktualisiert: %s\n", index + 1, newName);
+}
+
+std::array<HighscoreEntry, 10> HighscoreManager::getHighscoresCopy(bool isDefaultTime) const {
+    std::lock_guard<std::recursive_mutex> lock(mtx);
+    std::array<HighscoreEntry, 10> copy;
+    const HighscoreEntry* source = isDefaultTime ? highscores60 : highscoresDynamic;
+    for (int i = 0; i < 10; i++) {
+        copy[i] = source[i];
+    }
+    return copy;
 }

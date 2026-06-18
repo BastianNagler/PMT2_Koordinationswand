@@ -68,6 +68,12 @@ bool IO_Expander::resetAndReinit()
     digitalWrite(IO_EXPANDER_RESET_PIN, HIGH);
     vTaskDelay(pdMS_TO_TICKS(10)); // Wait 10ms for expanders to boot up
     
+    // Recover the I2C bus if stuck
+    recoverI2CBus(I2C_SDA_PIN, I2C_SCL_PIN);
+    Wire.end();
+    Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, 400000);
+    Wire.setTimeOut(100);
+    
     // Reconfigure both expanders
     bool success = true;
     for (uint8_t i = 0; i < num_io_exp; i++)
@@ -79,4 +85,39 @@ bool IO_Expander::resetAndReinit()
     }
     return success;
 }
+
+void recoverI2CBus(uint8_t sdaPin, uint8_t sclPin) {
+    pinMode(sdaPin, INPUT_PULLUP);
+    pinMode(sclPin, OUTPUT);
+    digitalWrite(sclPin, HIGH);
+    delay(1);
+
+    if (digitalRead(sdaPin) == LOW) {
+        WebLog.println("[I2C] SDA is stuck LOW! Attempting bus recovery...");
+        for (int i = 0; i < 9; i++) {
+            digitalWrite(sclPin, LOW);
+            delayMicroseconds(5);
+            digitalWrite(sclPin, HIGH);
+            delayMicroseconds(5);
+            if (digitalRead(sdaPin) == HIGH) {
+                WebLog.printf("[I2C] SDA released after %d clock pulses.\n", i + 1);
+                break;
+            }
+        }
+    }
+
+    // Generate a STOP condition to reset the bus state
+    pinMode(sdaPin, OUTPUT);
+    digitalWrite(sdaPin, LOW);
+    delayMicroseconds(5);
+    digitalWrite(sclPin, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(sdaPin, HIGH);
+    delayMicroseconds(5);
+
+    // Set pins back to high-impedance
+    pinMode(sdaPin, INPUT);
+    pinMode(sclPin, INPUT);
+}
+
 

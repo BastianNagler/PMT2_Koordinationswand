@@ -4,6 +4,8 @@
 #include "MCP23018.h"
 #include "config.h"
 
+void recoverI2CBus(uint8_t sdaPin, uint8_t sclPin);
+
 class IO_Expander
 {
 private:

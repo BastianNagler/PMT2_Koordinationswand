@@ -7,6 +7,7 @@
 
 #include "GameLogic.h" // Wichtig für Zugriff auf Highscores und updateLastHighscoreName
 #include "WebLog.h"
+#include <array>
 
 extern GameLogic gameInstance;
 
@@ -28,8 +29,9 @@ static String formatHexColor(uint32_t color) {
 }
 
 static uint32_t parseHexColor(const char* hexStr) {
-    if (hexStr == nullptr || strlen(hexStr) < 7) return 0;
+    if (hexStr == nullptr) return 0;
     if (hexStr[0] == '#') hexStr++;
+    if (strlen(hexStr) < 6) return 0;
     return (uint32_t)strtoul(hexStr, NULL, 16);
 }
 
@@ -162,7 +164,7 @@ void notifyGameOver() {
     doc["finalScoreP2"] = gameInstance.getScoreP2();
     doc["isDefaultTime"] = (gameInstance.settings.gameDurationMs == 60000);
     
-    const HighscoreEntry* highscores = gameInstance.getHighscores(gameInstance.settings.gameDurationMs == 60000);
+    std::array<HighscoreEntry, 10> highscores = gameInstance.getHighscoresCopy(gameInstance.settings.gameDurationMs == 60000);
 
     // Highscores Array dynamisch aufbauen
     JsonArray hsArray = doc["highscoreList"].to<JsonArray>();

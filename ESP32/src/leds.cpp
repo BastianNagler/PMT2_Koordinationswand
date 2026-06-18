@@ -29,6 +29,7 @@ void LED_Driver::init()
 
 bool LED_Driver::show(bool force)
 {
+    std::lock_guard<std::mutex> lock(led_mutex);
     if(needs_refresh || force == true)
     {
         needs_refresh = false;
@@ -67,6 +68,7 @@ void LED_Driver::set_rgb(uint32_t hex, uint8_t row, uint8_t column)
         // Out of bounds, do nothing to prevent memory corruption
         return;
     }
+    std::lock_guard<std::mutex> lock(led_mutex);
     needs_refresh = true;
     frame_buffer[row][column] = CRGB(hex);
 }

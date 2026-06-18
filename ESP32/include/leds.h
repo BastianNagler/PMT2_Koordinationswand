@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include "config.h"
+#include <mutex>
 
 /*
 convention for running-indexes of fields: 
@@ -20,6 +21,7 @@ private:
     CRGB frame_buffer[NUM_ROWS][NUM_COLUMNS];
     CRGB physical_frame_buffer[NUM_ROWS][NUM_COLUMNS][NUM_LEDS_PER_FIELD];
     volatile bool needs_refresh = true;
+    std::mutex led_mutex;
 
     /// @brief expands the frame_buffer to the physical_frame_buffer 
     void expand();

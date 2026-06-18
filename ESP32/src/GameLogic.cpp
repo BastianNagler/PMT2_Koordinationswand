@@ -293,6 +293,10 @@ void GameLogic::updateHighscoreName(const int index, const char* newName, bool i
 }
 
 void GameLogic::applyNewDuration(uint32_t newDuration) {
+    if (newDuration < 5000 || newDuration > 600000) {
+        WebLog.printf("[ERROR] applyNewDuration: invalid duration %u ms ignored!\n", newDuration);
+        return;
+    }
     if (settings.gameDurationMs != newDuration) {
         settings.gameDurationMs = newDuration;
         if (newDuration != 60000) {
