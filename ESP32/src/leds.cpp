@@ -31,36 +31,14 @@ void LED_Driver::init()
 bool LED_Driver::show(bool force)
 {
     std::lock_guard<std::mutex> lock(led_mutex);
-    
-    static uint32_t lastLogTime = 0;
-    static uint32_t frameCount = 0;
-    static uint32_t totalDurationUs = 0;
 
     if(needs_refresh || force == true)
     {
         needs_refresh = false;
         
-        uint32_t start = micros();
         expand();
         FastLED.show();
-        uint32_t duration = micros() - start;
         
-        frameCount++;
-        totalDurationUs += duration;
-        
-        uint32_t now = millis();
-        if (lastLogTime == 0) {
-            lastLogTime = now;
-        } else if (now - lastLogTime >= 10000) { // Log every 10 seconds
-            if (frameCount > 0) {
-                float avgDurationMs = (float)totalDurationUs / (frameCount * 1000.0f);
-                float fps = (float)frameCount * 1000.0f / (now - lastLogTime);
-                WebLog.printf("[LED] Average Refresh Rate: %.1f FPS (render duration: %.2f ms)\n", fps, avgDurationMs);
-            }
-            frameCount = 0;
-            totalDurationUs = 0;
-            lastLogTime = now;
-        }
         return true;
     }
     return false;

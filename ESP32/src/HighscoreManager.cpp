@@ -30,10 +30,6 @@ void HighscoreManager::load() {
     }
     
     clearDynamicHighscores();
-
-    for(int i=0; i<10; i++) {
-        WebLog.printf("%d. %s: %d\n", i+1, highscores60[i].name, highscores60[i].score);
-    }
 }
 
 void HighscoreManager::clearDynamicHighscores() {
