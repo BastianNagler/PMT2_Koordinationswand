@@ -1,17 +1,34 @@
 #pragma once
-#include <Arduino.h>
 
-// Initialisiert WLAN, Dateisystem, Webserver und WebSockets
+#include <Arduino.h>
+#include <cstdint>
+
+/**
+ * Initializes WiFi SoftAP, LittleFS filesystem, AsyncWebServer, and WebSocket endpoints.
+ */
 void initWebInterface();
 
-// Räumt getrennte Clients aus dem RAM (verhindert Memory-Leaks)
+/**
+ * Cleans up disconnected WebSocket clients from memory and flushes queued logs.
+ */
 void cleanupWebInterface();
 
-// Benachrichtigt das Tablet, dass das Spiel gestartet ist (inkl. Modus)
-void notifyGameStart(const char* mode);
+/**
+ * Broadcasts match start event with selected mode and countdown duration to all clients.
+ *
+ * @param[in] mode String identifier ("single" or "multi").
+ */
+void notifyGameStart(const char* const mode);
 
-// Sendet den aktuellen Punktestand an das Tablet
-void updateScore(uint8_t scoreP1, uint8_t scoreP2);
+/**
+ * Broadcasts updated player scores to all connected dashboard clients.
+ *
+ * @param[in] scoreP1 Current score count for Player 1.
+ * @param[in] scoreP2 Current score count for Player 2.
+ */
+void updateScore(const uint8_t scoreP1, const uint8_t scoreP2);
 
-// Sagt dem Tablet, dass das Spiel vorbei ist
+/**
+ * Broadcasts match completion event including final scores and refreshed highscore leaderboard.
+ */
 void notifyGameOver();

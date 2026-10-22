@@ -1,23 +1,20 @@
 #include "heartbeat.h"
 #include "WebLog.h"
 
-void HeartbeatLED::update()
-{
-    uint8_t brightness = beatsin8(30); // 30 BPM ≈ 2 Sekunden Periode
+void HeartbeatLED::update() {
+    // 30 BPM sine wave generates an approximate 2-second organic breathing period
+    const uint8_t brightness = beatsin8(30);
 
-    if (hasError)
-    {
-        color = (brightness << 8); // Rot pulsieren
+    if (hasError.load()) {
+        color = static_cast<uint32_t>(brightness) << 8;   // Pulsing Red (GRB format)
+    } else {
+        color = static_cast<uint32_t>(brightness) << 16;  // Pulsing Green (GRB format)
     }
-    else
-    {
-        color = (brightness << 16); // Grün pulsieren
-    }
+
     ws2812Write(HEARTBEAT_LED_PIN, color);
 }
 
-void HeartbeatLED::setError()
-{
-    WebLog.println("[HEARTBEAT] set error");
-    hasError = true;
+void HeartbeatLED::setError() {
+    WebLog.println("[HEARTBEAT] System error flagged");
+    hasError.store(true);
 }
