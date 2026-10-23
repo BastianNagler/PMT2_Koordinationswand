@@ -13,6 +13,9 @@ inline constexpr size_t MAX_LOG_LINES = 50;
 /** Maximum length of a single log message including timestamp and null terminator. */
 inline constexpr size_t MAX_LOG_LINE_LEN = 128;
 
+/** Function pointer type for evaluating whether a WebSocket client should receive logs. */
+using LogSubscriberFilter = bool (*)(const uint32_t clientId);
+
 /**
  * Thread-safe, statically allocated circular log buffer.
  *
@@ -70,9 +73,11 @@ public:
 
     /**
      * Periodically called strictly within `webTask` to flush newly arrived log
-     * messages to connected WebSocket clients without blocking real-time loops.
+     * messages exclusively to subscribed WebSocket clients without blocking real-time loops.
+     *
+     * @param[in] filter Optional predicate returning `true` if the client ID has requested logs.
      */
-    void flushPendingLogs();
+    void flushPendingLogs(const LogSubscriberFilter filter = nullptr);
 
     /**
      * Exports all currently held log lines into an ArduinoJson document.

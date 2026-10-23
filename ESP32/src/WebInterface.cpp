@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdio>
 #include <cstdlib>
+#include <mutex>
 
 #include "GameLogic.h"
 #include "WebLog.h"
@@ -15,6 +16,7 @@ extern GameLogic gameInstance;
 
 static AsyncWebServer server(80);
 static AsyncWebSocket ws("/ws");
+static std::mutex wsBroadcastMutex;
 
 static constexpr const char* SSID_NAME = "C-Wall";
 static constexpr const char* SSID_PASS = "cwallpassword";
@@ -40,6 +42,14 @@ static uint32_t parseHexColor(const char* hexStr) {
         return 0;
     }
     return static_cast<uint32_t>(strtoul(hexStr, nullptr, 16));
+}
+
+static void broadcastWs(const String& message) {
+    if (ws.count() == 0) {
+        return;
+    }
+    std::lock_guard<std::mutex> lock(wsBroadcastMutex);
+    ws.textAll(message);
 }
 
 static void sendStateToClient(AsyncWebSocketClient* const client) {
@@ -223,7 +233,7 @@ void notifyGameStart(const char* const mode) {
 
     String output;
     serializeJson(doc, output);
-    ws.textAll(output);
+    broadcastWs(output);
 }
 
 void updateScore(const uint8_t scoreP1, const uint8_t scoreP2) {
@@ -235,7 +245,7 @@ void updateScore(const uint8_t scoreP1, const uint8_t scoreP2) {
 
     String output;
     serializeJson(doc, output);
-    ws.textAll(output);
+    broadcastWs(output);
 }
 
 void notifyGameOver() {
@@ -256,5 +266,5 @@ void notifyGameOver() {
 
     String output;
     serializeJson(doc, output);
-    ws.textAll(output);
+    broadcastWs(output);
 }

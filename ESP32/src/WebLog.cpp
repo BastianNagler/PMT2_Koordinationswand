@@ -95,7 +95,7 @@ size_t WebLogClass::write(const uint8_t* const buffer, const size_t size) {
     return size;
 }
 
-void WebLogClass::flushPendingLogs() {
+void WebLogClass::flushPendingLogs(const LogSubscriberFilter filter) {
     AsyncWebSocket* wsTarget = nullptr;
     char linesToSend[8][MAX_LOG_LINE_LEN];
     size_t sendCount = 0;
@@ -110,7 +110,6 @@ void WebLogClass::flushPendingLogs() {
         const size_t pending = totalLogged - lastBroadcastSeq;
         sendCount = (pending > 8) ? 8 : pending;
 
-        // Determine starting slot in ring buffer
         for (size_t i = 0; i < sendCount; ++i) {
             const size_t seq = lastBroadcastSeq + i;
             const size_t offsetFromCurrent = totalLogged - 1 - seq;
@@ -124,6 +123,10 @@ void WebLogClass::flushPendingLogs() {
         lastBroadcastSeq += sendCount;
     }
 
+    if (sendCount == 0 || wsTarget == nullptr) {
+        return;
+    }
+
     for (size_t i = 0; i < sendCount; ++i) {
         if (linesToSend[i][0] != '\0') {
             JsonDocument doc;
@@ -131,25 +134,42 @@ void WebLogClass::flushPendingLogs() {
             doc["message"] = linesToSend[i];
             String output;
             serializeJson(doc, output);
-            wsTarget->textAll(output);
+
+            for (AsyncWebSocketClient& client : wsTarget->getClients()) {
+                if (client.status() == WS_CONNECTED) {
+                    if (filter == nullptr || filter(client.id())) {
+                        client.text(output);
+                    }
+                }
+            }
         }
     }
 }
 
 String WebLogClass::getLogsJson() {
-    std::lock_guard<std::mutex> lock(logMutex);
+    static char tempBuffer[MAX_LOG_LINES][MAX_LOG_LINE_LEN];
+    size_t count = 0;
+
+    {
+        // Minimal lock duration: copy entries into local buffer and release lock immediately
+        std::lock_guard<std::mutex> lock(logMutex);
+        count = ringCount;
+        const size_t startIdx = (ringCount < MAX_LOG_LINES) ? 0 : ringHead;
+
+        for (size_t i = 0; i < count; ++i) {
+            const size_t idx = (startIdx + i) % MAX_LOG_LINES;
+            memcpy(tempBuffer[i], ringBuffer[idx], MAX_LOG_LINE_LEN);
+        }
+    }
+
+    // Allocate ArduinoJson structures and serialize completely outside logMutex
     JsonDocument doc;
     doc["action"] = "log_history";
     JsonArray arr = doc["logs"].to<JsonArray>();
 
-    const size_t startIdx = (ringCount < MAX_LOG_LINES)
-                                ? 0
-                                : ringHead;
-
-    for (size_t i = 0; i < ringCount; ++i) {
-        const size_t idx = (startIdx + i) % MAX_LOG_LINES;
-        if (ringBuffer[idx][0] != '\0') {
-            arr.add(ringBuffer[idx]);
+    for (size_t i = 0; i < count; ++i) {
+        if (tempBuffer[i][0] != '\0') {
+            arr.add(tempBuffer[i]);
         }
     }
 
