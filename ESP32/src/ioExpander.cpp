@@ -19,11 +19,7 @@ bool IO_Expander::init() {
     return allInitialized;
 }
 
-bool IO_Expander::read(volatile bool* const isPressed, const uint8_t numFields) {
-    if (isPressed == nullptr) {
-        return false;
-    }
-
+bool IO_Expander::read(SensorState& sensorState, const uint8_t numFields) {
     for (uint8_t i = 0; i < num_io_exp; i++) {
         if (io_exp[i].needsRead) {
             uint16_t state = 0;
@@ -34,7 +30,7 @@ bool IO_Expander::read(volatile bool* const isPressed, const uint8_t numFields) 
             for (uint8_t j = 0; j < NUM_IO_PER_EXPANDER; j++) {
                 const uint8_t fieldIndex = static_cast<uint8_t>(i * NUM_IO_PER_EXPANDER + j);
                 if (fieldIndex < numFields) {
-                    isPressed[fieldIndex] = ((state & (1U << j)) != 0);
+                    sensorState.setPressed(fieldIndex, (state & (1U << j)) != 0);
                 }
             }
         }

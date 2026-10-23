@@ -7,8 +7,8 @@ static constexpr uint32_t IDLE_BLINK_INTERVAL_MS = 500;
 static constexpr uint32_t RIPPLE_ANIMATION_DURATION_MS = 150;
 static constexpr uint8_t INVALID_TARGET = 99;
 
-GameLogic::GameLogic(volatile bool* const inputState, LED_Driver& ledDriver)
-    : isPressed(inputState), leds(ledDriver) {}
+GameLogic::GameLogic(const SensorState& sensorState, LED_Driver& ledDriver)
+    : sensors(sensorState), leds(ledDriver) {}
 
 void GameLogic::init() {
     std::lock_guard<std::mutex> lock(stateMutex);
@@ -76,9 +76,9 @@ void GameLogic::handleIdleState(const uint32_t currentTime) {
         lastBlinkState = currentBlinkState;
     }
 
-    const bool pressed0 = isPressed[0];
-    const bool pressed7 = (NUM_FIELDS > 7) ? isPressed[7] : false;
-    const bool pressed15 = (NUM_FIELDS > 15) ? isPressed[15] : false;
+    const bool pressed0 = sensors.isPressed(0);
+    const bool pressed7 = (NUM_FIELDS > 7) ? sensors.isPressed(7) : false;
+    const bool pressed15 = (NUM_FIELDS > 15) ? sensors.isPressed(15) : false;
 
     if (pressed0 || pressed7 || pressed15) {
         scoreP1 = 0;
@@ -151,7 +151,7 @@ void GameLogic::handlePlayingState(const uint32_t currentTime) {
         return;
     }
 
-    if (targetP1 < NUM_FIELDS && isPressed[targetP1]) {
+    if (targetP1 < NUM_FIELDS && sensors.isPressed(targetP1)) {
         scoreP1 += 1;
         leds.set_rgb(COLOR_OFF, targetP1);
 
@@ -162,7 +162,7 @@ void GameLogic::handlePlayingState(const uint32_t currentTime) {
         return;
     }
 
-    if (currentMode == MULTI_PLAYER && targetP2 < NUM_FIELDS && isPressed[targetP2]) {
+    if (currentMode == MULTI_PLAYER && targetP2 < NUM_FIELDS && sensors.isPressed(targetP2)) {
         scoreP2 += 1;
         leds.set_rgb(COLOR_OFF, targetP2);
 
@@ -250,7 +250,7 @@ void GameLogic::handleCooldownState(const uint32_t currentTime) {
 
 bool GameLogic::isGameAbortRequested() const {
 #if NUM_FIELDS >= 4
-    return isPressed[0] && isPressed[1] && isPressed[2] && isPressed[3];
+    return sensors.areAllPressed({0, 1, 2, 3});
 #else
     return false;
 #endif

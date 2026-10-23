@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <mutex>
 #include "HighscoreManager.h"
+#include "SensorState.h"
 #include "config.h"
 #include "leds.h"
 
@@ -61,7 +62,7 @@ struct GameSettings {
  */
 class GameLogic {
 private:
-    volatile bool* const isPressed;
+    const SensorState& sensors;
     LED_Driver& leds;
     HighscoreManager highscoreManager;
 
@@ -101,10 +102,10 @@ public:
     /**
      * Constructs the GameLogic engine with references to shared sensor states and LED driver.
      *
-     * @param[in] inputState Pointer to volatile sensor pressed state array.
+     * @param[in] sensorState Reference to the thread-safe sensor state container.
      * @param[in] ledDriver Reference to the hardware LED driver.
      */
-    GameLogic(volatile bool* const inputState, LED_Driver& ledDriver);
+    GameLogic(const SensorState& sensorState, LED_Driver& ledDriver);
 
     ~GameLogic() = default;
     GameLogic(const GameLogic&) = delete;

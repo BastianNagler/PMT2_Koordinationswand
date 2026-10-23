@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "GameLogic.h"
+#include "SensorState.h"
 #include "config.h"
 #include "leds.h"
 #include "ioExpander.h"
@@ -13,8 +14,8 @@
 #include "WebInterface.h"
 #include "WebLog.h"
 
-/** Global sensor state array shared between input polling and game logic. */
-volatile bool isPressed[NUM_FIELDS];
+/** Global lock-free atomic sensor state container shared across tasks. */
+SensorState sensorState;
 
 /** Hardware LED driver controlling parallel WS2812B channels. */
 LED_Driver leds;
@@ -23,7 +24,7 @@ LED_Driver leds;
 HeartbeatLED heartbeat;
 
 /** Core game state machine engine. */
-GameLogic gameInstance(isPressed, leds);
+GameLogic gameInstance(sensorState, leds);
 
 static void inputTask(void* pvParameters);
 static void gameTask(void* pvParameters);
@@ -84,7 +85,7 @@ static void inputTask(void* pvParameters) {
     esp_task_wdt_add(nullptr);
 
     while (true) {
-        if (!expanders.read(isPressed, NUM_FIELDS)) {
+        if (!expanders.read(sensorState, NUM_FIELDS)) {
             WebLog.println("[ERROR] IO-Expander read fault, initiating bus recovery");
             heartbeat.setError();
             if (expanders.resetAndReinit()) {
@@ -96,7 +97,7 @@ static void inputTask(void* pvParameters) {
 
         // Apply hardware errata reading for sensor 16
         if (NUM_FIELDS >= 17) {
-            isPressed[16] = (digitalRead(SENSOR_16_OVERRIDE_PIN) == HIGH);
+            sensorState.setPressed(16, digitalRead(SENSOR_16_OVERRIDE_PIN) == HIGH);
         }
 
         esp_task_wdt_reset();

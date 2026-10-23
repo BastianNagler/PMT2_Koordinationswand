@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include "MCP23018.h"
+#include "SensorState.h"
 #include "config.h"
 
 /**
@@ -45,14 +46,14 @@ public:
     bool init();
 
     /**
-     * Reads all pending inputs from expanders that signaled an interrupt.
+     * Reads all pending inputs from expanders that signaled an interrupt into thread-safe SensorState.
      *
-     * @param[out] isPressed Pointer to volatile array receiving boolean pressed states.
+     * @param[out] sensorState Target thread-safe sensor state container.
      * @param[in] numFields Number of valid fields to populate.
      *
      * @return `true` if all pending reads succeeded, `false` on bus error.
      */
-    bool read(volatile bool* const isPressed, const uint8_t numFields);
+    bool read(SensorState& sensorState, const uint8_t numFields);
 
     /**
      * Pulses hardware reset pin and re-initializes all MCP23018 expanders.
