@@ -1,5 +1,7 @@
 #include "WebInterface.h"
 #include <WiFi.h>
+#include <DNSServer.h>
+#include <ESPmDNS.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
@@ -17,13 +19,16 @@ extern GameLogic gameInstance;
 static AsyncWebServer server(80);
 static AsyncWebSocket ws("/ws");
 static std::mutex wsBroadcastMutex;
+static DNSServer dnsServer;
 
 static constexpr const char* SSID_NAME = "C-Wall";
 static constexpr const char* SSID_PASS = "cwallpassword";
 
-static const IPAddress localIP(192, 168, 1, 1);
-static const IPAddress localGW(192, 168, 1, 1);
+static const IPAddress localIP(192, 168, 4, 1);
+static const IPAddress localGW(192, 168, 4, 1);
 static const IPAddress localSN(255, 255, 255, 0);
+
+inline constexpr uint8_t MAX_SOFTAP_CONNECTIONS = 8;
 
 static String formatHexColor(const uint32_t color) {
     char buf[10];
@@ -189,14 +194,69 @@ void initWebInterface() {
         return;
     }
 
+    WiFi.persistent(false);
     WiFi.mode(WIFI_AP);
-    WiFi.softAPConfig(localIP, localGW, localSN);
-    WiFi.softAP(SSID_NAME, SSID_PASS);
-    WebLog.print("[WEB] SoftAP active at ");
-    WebLog.println(WiFi.softAPIP());
+    WiFi.setSleep(false);
+
+    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+        if (event == ARDUINO_EVENT_WIFI_AP_STACONNECTED) {
+            WebLog.printf("[WIFI] Station connected, MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                          info.wifi_ap_staconnected.mac[0], info.wifi_ap_staconnected.mac[1],
+                          info.wifi_ap_staconnected.mac[2], info.wifi_ap_staconnected.mac[3],
+                          info.wifi_ap_staconnected.mac[4], info.wifi_ap_staconnected.mac[5]);
+        } else if (event == ARDUINO_EVENT_WIFI_AP_STADISCONNECTED) {
+            WebLog.printf("[WIFI] Station disconnected, MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                          info.wifi_ap_stadisconnected.mac[0], info.wifi_ap_stadisconnected.mac[1],
+                          info.wifi_ap_stadisconnected.mac[2], info.wifi_ap_stadisconnected.mac[3],
+                          info.wifi_ap_stadisconnected.mac[4], info.wifi_ap_stadisconnected.mac[5]);
+        } else if (event == ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED) {
+            WebLog.printf("[WIFI] IP assigned to station: %s\n",
+                          IPAddress(info.wifi_ap_staipassigned.ip.addr).toString().c_str());
+        }
+    });
+
+    if (!WiFi.softAPConfig(localIP, localGW, localSN)) {
+        WebLog.println("[ERROR] Failed to configure SoftAP IP address");
+    }
+    if (!WiFi.softAP(SSID_NAME, SSID_PASS, 1, 0, MAX_SOFTAP_CONNECTIONS)) {
+        WebLog.println("[ERROR] Failed to start SoftAP");
+    }
+
+    WebLog.printf("[WEB] SoftAP active. SSID: %s | IP: %s | Max stations: %u\n",
+                  SSID_NAME, WiFi.softAPIP().toString().c_str(), MAX_SOFTAP_CONNECTIONS);
+
+    dnsServer.start(53, "*", localIP);
+    WebLog.println("[WEB] DNS server started: resolving all hostnames to SoftAP IP");
+
+    if (MDNS.begin("cwall")) {
+        MDNS.addService("http", "tcp", 80);
+        WebLog.println("[WEB] mDNS responder started: http://cwall.local");
+    }
 
     ws.onEvent(onEvent);
     server.addHandler(&ws);
+
+    // Provide instant 204 response for favicon requests
+    server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest* const request) {
+        request->send(204);
+    });
+
+    // Captive portal & network connectivity probes for client OS validation
+    server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest* const request) {
+        request->send(204);
+    });
+    server.on("/gen_204", HTTP_GET, [](AsyncWebServerRequest* const request) {
+        request->send(204);
+    });
+    server.on("/connecttest.txt", HTTP_GET, [](AsyncWebServerRequest* const request) {
+        request->send(200, "text/plain", "Microsoft Connect Test");
+    });
+    server.on("/ncsi.txt", HTTP_GET, [](AsyncWebServerRequest* const request) {
+        request->send(200, "text/plain", "Microsoft NCSI");
+    });
+    server.on("/hotspot-detect.html", HTTP_GET, [](AsyncWebServerRequest* const request) {
+        request->send(200, "text/html", "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+    });
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest* const request) {
         request->send(LittleFS, "/index.html", "text/html");
@@ -221,6 +281,11 @@ void initWebInterface() {
 }
 
 void cleanupWebInterface() {
+    // 1. Drain pending DNS queries in a quick non-blocking loop
+    for (size_t i = 0; i < 4; ++i) {
+        dnsServer.processNextRequest();
+    }
+
     ws.cleanupClients();
     WebLog.flushPendingLogs();
 }
