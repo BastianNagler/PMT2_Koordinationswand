@@ -44,7 +44,7 @@ static uint32_t parseHexColor(const char* hexStr) {
 
 static void sendStateToClient(AsyncWebSocketClient* const client) {
     const GameState state = gameInstance.getGameState();
-    const uint32_t duration = gameInstance.settings.gameDurationMs;
+    const uint32_t duration = gameInstance.getGameDurationMs();
     const bool isDefaultTime = (duration == 60000);
 
     if (state == PLAYING || state == START_ANIM || state == RIPPLE_ANIM) {
@@ -115,21 +115,22 @@ static void onEvent(AsyncWebSocket* const serverInstance, AsyncWebSocketClient* 
                     if (strcmp(action, "set name") == 0) {
                         const char* const newName = doc["playerName"];
                         const int index = doc["index"];
-                        const bool isDefaultTime = (gameInstance.settings.gameDurationMs == 60000);
+                        const bool isDefaultTime = (gameInstance.getGameDurationMs() == 60000);
                         gameInstance.updateHighscoreName(index, newName, isDefaultTime);
                         notifyGameOver();
                     } else if (strcmp(action, "get_logs") == 0) {
                         const String logsJson = WebLog.getLogsJson();
                         client->text(logsJson);
                     } else if (strcmp(action, "get_config") == 0) {
+                        const GameSettings currentSettings = gameInstance.getSettings();
                         JsonDocument configDoc;
                         configDoc["action"] = "config_data";
-                        configDoc["gameDurationMs"] = gameInstance.settings.gameDurationMs;
-                        configDoc["colorStartAnim"] = formatHexColor(gameInstance.settings.colorStartAnim);
-                        configDoc["colorP1"] = formatHexColor(gameInstance.settings.colorP1);
-                        configDoc["colorP2"] = formatHexColor(gameInstance.settings.colorP2);
-                        configDoc["colorP1Ripple"] = formatHexColor(gameInstance.settings.colorP1Ripple);
-                        configDoc["colorP2Ripple"] = formatHexColor(gameInstance.settings.colorP2Ripple);
+                        configDoc["gameDurationMs"] = currentSettings.gameDurationMs;
+                        configDoc["colorStartAnim"] = formatHexColor(currentSettings.colorStartAnim);
+                        configDoc["colorP1"] = formatHexColor(currentSettings.colorP1);
+                        configDoc["colorP2"] = formatHexColor(currentSettings.colorP2);
+                        configDoc["colorP1Ripple"] = formatHexColor(currentSettings.colorP1Ripple);
+                        configDoc["colorP2Ripple"] = formatHexColor(currentSettings.colorP2Ripple);
 
                         String output;
                         serializeJson(configDoc, output);
@@ -138,21 +139,25 @@ static void onEvent(AsyncWebSocket* const serverInstance, AsyncWebSocketClient* 
                         if (!doc["gameDurationMs"].isNull()) {
                             gameInstance.applyNewDuration(doc["gameDurationMs"]);
                         }
+                        GameSettings newSettings = gameInstance.getSettings();
                         if (!doc["colorStartAnim"].isNull()) {
-                            gameInstance.settings.colorStartAnim = parseHexColor(doc["colorStartAnim"]);
+                            newSettings.colorStartAnim = parseHexColor(doc["colorStartAnim"]);
                         }
                         if (!doc["colorP1"].isNull()) {
-                            gameInstance.settings.colorP1 = parseHexColor(doc["colorP1"]);
+                            newSettings.colorP1 = parseHexColor(doc["colorP1"]);
                         }
                         if (!doc["colorP2"].isNull()) {
-                            gameInstance.settings.colorP2 = parseHexColor(doc["colorP2"]);
+                            newSettings.colorP2 = parseHexColor(doc["colorP2"]);
                         }
                         if (!doc["colorP1Ripple"].isNull()) {
-                            gameInstance.settings.colorP1Ripple = parseHexColor(doc["colorP1Ripple"]);
+                            newSettings.colorP1Ripple = parseHexColor(doc["colorP1Ripple"]);
                         }
                         if (!doc["colorP2Ripple"].isNull()) {
-                            gameInstance.settings.colorP2Ripple = parseHexColor(doc["colorP2Ripple"]);
+                            newSettings.colorP2Ripple = parseHexColor(doc["colorP2Ripple"]);
                         }
+                        gameInstance.setColors(newSettings.colorStartAnim, newSettings.colorP1,
+                                               newSettings.colorP2, newSettings.colorP1Ripple,
+                                               newSettings.colorP2Ripple);
                         WebLog.println("[WEB] Applied new configuration settings");
                     } else if (strcmp(action, "reset_highscore") == 0) {
                         gameInstance.reset60sHighscore();
@@ -214,7 +219,7 @@ void notifyGameStart(const char* const mode) {
     JsonDocument doc;
     doc["action"] = "start game";
     doc["mode"] = mode;
-    doc["durationMs"] = gameInstance.settings.gameDurationMs;
+    doc["durationMs"] = gameInstance.getGameDurationMs();
 
     String output;
     serializeJson(doc, output);
@@ -234,7 +239,7 @@ void updateScore(const uint8_t scoreP1, const uint8_t scoreP2) {
 }
 
 void notifyGameOver() {
-    const bool isDefaultTime = (gameInstance.settings.gameDurationMs == 60000);
+    const bool isDefaultTime = (gameInstance.getGameDurationMs() == 60000);
     JsonDocument doc;
     doc["action"] = "end of game";
     doc["finalScoreP1"] = gameInstance.getScoreP1();

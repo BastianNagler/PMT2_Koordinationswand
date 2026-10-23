@@ -68,6 +68,10 @@ private:
 
     mutable std::mutex stateMutex;
 
+    GameSettings settings;
+    uint32_t activeMatchDurationMs = 60000;
+    uint32_t pendingDurationMs = 0;
+
     GameState gameState = IDLE;
     GameMode currentMode = SINGLE_PLAYER;
 
@@ -97,8 +101,6 @@ private:
     void displayWinnerScreen();
 
 public:
-    GameSettings settings;
-
     /**
      * Constructs the GameLogic engine with references to shared sensor states and LED driver.
      *
@@ -159,6 +161,23 @@ public:
     uint32_t getGameStartTime() const;
 
     /**
+     * Retrieves a thread-safe snapshot of all active game settings.
+     *
+     * @return Copy of the current `GameSettings` configuration.
+     */
+    GameSettings getSettings() const;
+
+    /**
+     * Retrieves the match duration in milliseconds.
+     *
+     * During an active match, returns the duration of the current match;
+     * otherwise returns the configured duration for upcoming matches.
+     *
+     * @return Match duration in milliseconds.
+     */
+    uint32_t getGameDurationMs() const;
+
+    /**
      * Obtains a thread-safe copy of the requested highscore table.
      *
      * @param[in] isDefaultTime `true` for standard 60s table, `false` for dynamic table.
@@ -178,6 +197,9 @@ public:
 
     /**
      * Validates and applies a new game duration setting.
+     *
+     * If a match is currently in progress, the change is queued and applied
+     * automatically upon returning to the IDLE state after match completion.
      *
      * @param[in] newDuration Target match duration in milliseconds (5000 to 600000).
      */

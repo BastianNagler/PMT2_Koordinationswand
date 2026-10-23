@@ -13,6 +13,8 @@ GameLogic::GameLogic(const SensorState& sensorState, LED_Driver& ledDriver)
 void GameLogic::init() {
     std::lock_guard<std::mutex> lock(stateMutex);
     highscoreManager.load();
+    activeMatchDurationMs = settings.gameDurationMs;
+    pendingDurationMs = 0;
 }
 
 uint8_t GameLogic::getRandomGenerator(const uint8_t min, const uint8_t max) {
@@ -88,6 +90,8 @@ void GameLogic::handleIdleState(const uint32_t currentTime) {
         lastP1 = INVALID_TARGET;
         lastP2 = INVALID_TARGET;
 
+        activeMatchDurationMs = settings.gameDurationMs;
+
         leds.clear();
 
         if (pressed0) {
@@ -123,7 +127,6 @@ void GameLogic::handleStartAnimState(const uint32_t currentTime) {
         }
     } else {
         leds.clear();
-
         gameStartTime = currentTime;
 
         if (currentMode == SINGLE_PLAYER) {
@@ -144,7 +147,7 @@ void GameLogic::handlePlayingState(const uint32_t currentTime) {
         return;
     }
 
-    if (currentTime - gameStartTime >= settings.gameDurationMs) {
+    if (currentTime - gameStartTime >= activeMatchDurationMs) {
         gameState = GAME_OVER;
         return;
     }
@@ -225,7 +228,7 @@ void GameLogic::handleRippleAnimState(const uint32_t currentTime) {
 void GameLogic::handleGameOverState(const uint32_t currentTime) {
     if (currentMode == SINGLE_PLAYER) {
         WebLog.printf("[GAME] Time up! Score: %d\n", scoreP1);
-        highscoreManager.checkAndAdd(scoreP1, settings.gameDurationMs == 60000);
+        highscoreManager.checkAndAdd(scoreP1, activeMatchDurationMs == 60000);
     } else {
         WebLog.printf("[GAME] Time up! P1: %d | P2: %d\n", scoreP1, scoreP2);
     }
@@ -238,6 +241,18 @@ void GameLogic::handleGameOverState(const uint32_t currentTime) {
 void GameLogic::handleCooldownState(const uint32_t currentTime) {
     if (currentTime - cooldownStartTime >= COOLDOWN_DURATION_MS) {
         leds.clear();
+
+        if (pendingDurationMs != 0) {
+            settings.gameDurationMs = pendingDurationMs;
+            if (settings.gameDurationMs != 60000) {
+                highscoreManager.clearDynamicHighscores();
+            }
+            WebLog.printf("[GAME] Applied queued game duration: %u ms for next match\n",
+                          settings.gameDurationMs);
+            pendingDurationMs = 0;
+        }
+
+        activeMatchDurationMs = settings.gameDurationMs;
         gameState = IDLE;
     }
 }
@@ -294,6 +309,26 @@ uint32_t GameLogic::getGameStartTime() const {
     return gameStartTime;
 }
 
+GameSettings GameLogic::getSettings() const {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    GameSettings copy = settings;
+    if (pendingDurationMs != 0) {
+        copy.gameDurationMs = pendingDurationMs;
+    }
+    return copy;
+}
+
+uint32_t GameLogic::getGameDurationMs() const {
+    std::lock_guard<std::mutex> lock(stateMutex);
+    const bool gameIsActive = (gameState == START_ANIM || gameState == PLAYING ||
+                               gameState == RIPPLE_ANIM || gameState == GAME_OVER ||
+                               gameState == COOLDOWN);
+    if (gameIsActive) {
+        return activeMatchDurationMs;
+    }
+    return (pendingDurationMs != 0) ? pendingDurationMs : settings.gameDurationMs;
+}
+
 std::array<HighscoreEntry, NUM_HIGHSCORES> GameLogic::getHighscoresCopy(const bool isDefaultTime) const {
     std::lock_guard<std::mutex> lock(stateMutex);
     return highscoreManager.getHighscoresCopy(isDefaultTime);
@@ -310,10 +345,24 @@ void GameLogic::applyNewDuration(const uint32_t newDuration) {
         WebLog.printf("[ERROR] applyNewDuration: invalid duration %u ms rejected\n", newDuration);
         return;
     }
-    if (settings.gameDurationMs != newDuration) {
-        settings.gameDurationMs = newDuration;
-        if (newDuration != 60000) {
-            highscoreManager.clearDynamicHighscores();
+
+    const bool gameIsActive = (gameState == START_ANIM || gameState == PLAYING ||
+                               gameState == RIPPLE_ANIM || gameState == GAME_OVER ||
+                               gameState == COOLDOWN);
+
+    if (gameIsActive) {
+        pendingDurationMs = newDuration;
+        WebLog.printf("[GAME] Match active (%u ms): new duration %u ms queued for next match\n",
+                      activeMatchDurationMs, newDuration);
+    } else {
+        pendingDurationMs = 0;
+        if (settings.gameDurationMs != newDuration) {
+            settings.gameDurationMs = newDuration;
+            activeMatchDurationMs = newDuration;
+            if (newDuration != 60000) {
+                highscoreManager.clearDynamicHighscores();
+            }
+            WebLog.printf("[GAME] Applied new game duration: %u ms\n", newDuration);
         }
     }
 }
