@@ -40,12 +40,15 @@ static void heartbeatTask(void* pvParameters);
  */
 static void custom_panic_handler(arduino_panic_info_t* const info, void* const arg) {
     // Force heartbeat LED to bright solid red
-    ws2812Write(HEARTBEAT_LED_PIN, 0x00FF00);
+    ws2812Write(HEARTBEAT_LED_PIN, 0xFF0000);
 }
 
 void setup() {
     delay(500);
+    Serial.setTxBufferSize(1024);
     Serial.begin(115200);
+
+    WebLog.println("[SETUP] Booting cWall ESP32-S3...");
 
     if (!LittleFS.begin(true)) {
         WebLog.println("[ERROR] LittleFS mounting failed at boot");
@@ -60,19 +63,43 @@ void setup() {
 
     set_arduino_panic_handler(custom_panic_handler, nullptr);
 
-    xTaskCreate(ledTask, "LED Task", 4096, nullptr, 4, nullptr);
-    xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, nullptr, 3, nullptr, 1);
-    xTaskCreate(gameTask, "Game Task", 4096, nullptr, 2, nullptr);
-    xTaskCreate(webTask, "Web Task", 8192, nullptr, 1, nullptr);
-    xTaskCreate(heartbeatTask, "Heartbeat Task", 2048, nullptr, 0, nullptr);
+    BaseType_t ret;
 
-    vTaskDelete(nullptr);
+    // Core 1 Task Hierarchy: Input (4) > Game (3) > LED (2) > Heartbeat (1)
+    ret = xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, nullptr, 4, nullptr, 1);
+    if (ret != pdPASS) {
+        WebLog.printf("[ERROR] Failed to create Input Task (err: %d)\n", ret);
+    }
+
+    ret = xTaskCreatePinnedToCore(gameTask, "Game Task", 4096, nullptr, 3, nullptr, 1);
+    if (ret != pdPASS) {
+        WebLog.printf("[ERROR] Failed to create Game Task (err: %d)\n", ret);
+    }
+
+    ret = xTaskCreatePinnedToCore(ledTask, "LED Task", 4096, nullptr, 2, nullptr, 1);
+    if (ret != pdPASS) {
+        WebLog.printf("[ERROR] Failed to create LED Task (err: %d)\n", ret);
+    }
+
+    ret = xTaskCreatePinnedToCore(heartbeatTask, "Heartbeat Task", 2048, nullptr, 1, nullptr, 1);
+    if (ret != pdPASS) {
+        WebLog.printf("[ERROR] Failed to create Heartbeat Task (err: %d)\n", ret);
+    }
+
+    // Core 0 Task: Web Task (1) isolated from real-time Core 1 loops
+    ret = xTaskCreatePinnedToCore(webTask, "Web Task", 8192, nullptr, 1, nullptr, 0);
+    if (ret != pdPASS) {
+        WebLog.printf("[ERROR] Failed to create Web Task (err: %d)\n", ret);
+    }
+
+    WebLog.println("[SETUP] Initialization completed, all tasks dispatched");
 }
 
 /**
  * High-priority input polling task scanning I/O expanders and discrete inputs.
  */
 static void inputTask(void* pvParameters) {
+    WebLog.println("[TASK] Input Task running on Core 1");
     static IO_Expander expanders(NUM_IO_EXPANDER, IO_EXPANDER_ADDRESSES, IO_EXPANDER_IRQ_PINS);
 
     if (!expanders.init()) {
@@ -82,7 +109,10 @@ static void inputTask(void* pvParameters) {
     // Hardware errata workaround: PCB trace for sensor box 16 routed directly to discrete GPIO
     pinMode(SENSOR_16_OVERRIDE_PIN, INPUT);
 
-    esp_task_wdt_add(nullptr);
+    const esp_err_t wdtErr = esp_task_wdt_add(nullptr);
+    if (wdtErr != ESP_OK) {
+        WebLog.printf("[WDT] [INFO] Input Task TWDT not active (0x%X)\n", wdtErr);
+    }
 
     while (true) {
         if (!expanders.read(sensorState, NUM_FIELDS)) {
@@ -100,6 +130,7 @@ static void inputTask(void* pvParameters) {
             sensorState.setPressed(16, digitalRead(SENSOR_16_OVERRIDE_PIN) == HIGH);
         }
 
+
         esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(10));
     }
@@ -109,7 +140,12 @@ static void inputTask(void* pvParameters) {
  * Core game task calculating transitions and animations at 100 Hz.
  */
 static void gameTask(void* pvParameters) {
-    esp_task_wdt_add(nullptr);
+    WebLog.println("[TASK] Game Task running on Core 1");
+    const esp_err_t wdtErr = esp_task_wdt_add(nullptr);
+    if (wdtErr != ESP_OK) {
+        WebLog.printf("[WDT] [INFO] Game Task TWDT not active (0x%X)\n", wdtErr);
+    }
+
     gameInstance.init();
 
     while (true) {
@@ -124,6 +160,12 @@ static void gameTask(void* pvParameters) {
  * Networking task hosting the SoftAP web server and WebSocket broadcaster.
  */
 static void webTask(void* pvParameters) {
+    WebLog.println("[TASK] Web Task running on Core 0");
+    const esp_err_t wdtErr = esp_task_wdt_add(nullptr);
+    if (wdtErr != ESP_OK) {
+        WebLog.printf("[WDT] [INFO] Web Task TWDT not active (0x%X)\n", wdtErr);
+    }
+
     static GameState lastGameState = IDLE;
     static uint8_t lastScoreP1 = 0;
     static uint8_t lastScoreP2 = 0;
@@ -157,6 +199,7 @@ static void webTask(void* pvParameters) {
             }
         }
 
+        esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
@@ -165,7 +208,12 @@ static void webTask(void* pvParameters) {
  * High-priority display task rendering the frame buffer to physical WS2812 strips.
  */
 static void ledTask(void* pvParameters) {
-    esp_task_wdt_add(nullptr);
+    WebLog.println("[TASK] LED Task running on Core 1");
+    const esp_err_t wdtErr = esp_task_wdt_add(nullptr);
+    if (wdtErr != ESP_OK) {
+        WebLog.printf("[WDT] [INFO] LED Task TWDT not active (0x%X)\n", wdtErr);
+    }
+
     leds.init();
 
     while (true) {
@@ -180,6 +228,7 @@ static void ledTask(void* pvParameters) {
  * Low-priority task driving the heartbeat status LED.
  */
 static void heartbeatTask(void* pvParameters) {
+    WebLog.println("[TASK] Heartbeat Task running on Core 1");
     while (true) {
         heartbeat.update();
         vTaskDelay(pdMS_TO_TICKS(30));
@@ -187,5 +236,6 @@ static void heartbeatTask(void* pvParameters) {
 }
 
 void loop() {
-    // Unused in FreeRTOS environment
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    WebLog.printf("[SYSTEM] Free Heap: %u bytes\n", ESP.getFreeHeap());
 }
