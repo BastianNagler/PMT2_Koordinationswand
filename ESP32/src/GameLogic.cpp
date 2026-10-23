@@ -48,16 +48,20 @@ void GameLogic::set_next_target(const uint8_t player) {
 }
 
 void GameLogic::run(const uint32_t currentTime) {
-    std::lock_guard<std::mutex> lock(stateMutex);
+    {
+        std::lock_guard<std::mutex> lock(stateMutex);
 
-    switch (gameState) {
-        case IDLE:        handleIdleState(currentTime);       break;
-        case START_ANIM:  handleStartAnimState(currentTime);  break;
-        case PLAYING:     handlePlayingState(currentTime);    break;
-        case RIPPLE_ANIM: handleRippleAnimState(currentTime); break;
-        case GAME_OVER:   handleGameOverState(currentTime);   break;
-        case COOLDOWN:    handleCooldownState(currentTime);   break;
+        switch (gameState) {
+            case IDLE:        handleIdleState(currentTime);       break;
+            case START_ANIM:  handleStartAnimState(currentTime);  break;
+            case PLAYING:     handlePlayingState(currentTime);    break;
+            case RIPPLE_ANIM: handleRippleAnimState(currentTime); break;
+            case GAME_OVER:   handleGameOverState(currentTime);   break;
+            case COOLDOWN:    handleCooldownState(currentTime);   break;
+        }
     }
+
+    leds.commitFrame();
 }
 
 void GameLogic::handleIdleState(const uint32_t currentTime) {
@@ -65,9 +69,7 @@ void GameLogic::handleIdleState(const uint32_t currentTime) {
     const bool currentBlinkState = ((currentTime / IDLE_BLINK_INTERVAL_MS) % 2) == 0;
 
     if (currentBlinkState != lastBlinkState) {
-        for (uint8_t i = 0; i < NUM_FIELDS; ++i) {
-            leds.set_rgb(COLOR_OFF, i);
-        }
+        leds.clear();
         if (currentBlinkState) {
             leds.set_rgb(settings.colorP1, 0);
             leds.set_rgb(settings.colorP2, 7);
@@ -86,9 +88,7 @@ void GameLogic::handleIdleState(const uint32_t currentTime) {
         lastP1 = INVALID_TARGET;
         lastP2 = INVALID_TARGET;
 
-        for (uint8_t i = 0; i < NUM_FIELDS; ++i) {
-            leds.set_rgb(COLOR_OFF, i);
-        }
+        leds.clear();
 
         if (pressed0) {
             currentMode = SINGLE_PLAYER;
@@ -122,9 +122,7 @@ void GameLogic::handleStartAnimState(const uint32_t currentTime) {
             }
         }
     } else {
-        for (uint8_t i = 0; i < NUM_FIELDS; ++i) {
-            leds.set_rgb(COLOR_OFF, i);
-        }
+        leds.clear();
 
         gameStartTime = currentTime;
 
@@ -179,9 +177,7 @@ void GameLogic::handleRippleAnimState(const uint32_t currentTime) {
 
     if (elapsedTime >= RIPPLE_ANIMATION_DURATION_MS) {
         gameState = PLAYING;
-        for (uint8_t i = 0; i < NUM_FIELDS; ++i) {
-            leds.set_rgb(COLOR_OFF, i);
-        }
+        leds.clear();
         set_next_target(playerWhoScored);
 
         if (currentMode == MULTI_PLAYER) {
@@ -241,9 +237,7 @@ void GameLogic::handleGameOverState(const uint32_t currentTime) {
 
 void GameLogic::handleCooldownState(const uint32_t currentTime) {
     if (currentTime - cooldownStartTime >= COOLDOWN_DURATION_MS) {
-        for (uint8_t i = 0; i < NUM_FIELDS; ++i) {
-            leds.set_rgb(COLOR_OFF, i);
-        }
+        leds.clear();
         gameState = IDLE;
     }
 }
