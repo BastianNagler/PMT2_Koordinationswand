@@ -56,7 +56,13 @@ inline constexpr uint8_t LED_DRIVER_3_PIN = 39;
 inline constexpr uint8_t LED_DATA_EN_PIN = 2;
 
 /** GPIO pin connected to the onboard WS2812 RGB heartbeat / status LED. */
-inline constexpr uint8_t HEARTBEAT_LED_PIN = 38;
+inline constexpr uint8_t HEARTBEAT_LED_PIN = 48;
+
+/** When true, the onboard WS2812 LED mirrors Box 0 (field 0) instead of the heartbeat pulse. */
+inline constexpr bool ONBOARD_LED_MIRRORS_BOX_0 = true;
+
+/** GPIO pin for the onboard BOOT push-button used for hardware-less test input (active low). */
+inline constexpr uint8_t ONBOARD_BOOT_BUTTON_PIN = 0;
 
 /** GPIO pin for I2C SCL clock line. */
 inline constexpr uint8_t I2C_SCL_PIN = 9;

@@ -108,6 +108,7 @@ static void inputTask(void* pvParameters) {
 
     // Hardware errata workaround: PCB trace for sensor box 16 routed directly to discrete GPIO
     pinMode(SENSOR_16_OVERRIDE_PIN, INPUT);
+    pinMode(ONBOARD_BOOT_BUTTON_PIN, INPUT_PULLUP);
 
     const esp_err_t wdtErr = esp_task_wdt_add(nullptr);
     if (wdtErr != ESP_OK) {
@@ -130,6 +131,13 @@ static void inputTask(void* pvParameters) {
             sensorState.setPressed(16, digitalRead(SENSOR_16_OVERRIDE_PIN) == HIGH);
         }
 
+        // Mirror onboard BOOT push-button to sensor box 0 for hardware-less desk testing
+        const bool bootPressed = (digitalRead(ONBOARD_BOOT_BUTTON_PIN) == LOW);
+        if (bootPressed) {
+            sensorState.setPressed(0, true);
+        } else if (heartbeat.getError()) {
+            sensorState.setPressed(0, false);
+        }
 
         esp_task_wdt_reset();
         vTaskDelay(pdMS_TO_TICKS(10));
