@@ -88,6 +88,7 @@ bool MCP23018::read(uint16_t& data) {
     Wire.write(MCP23018Registers::GPIOA);
     const uint8_t writeErr = Wire.endTransmission();
     if (writeErr != 0) {
+        needsRead = true;
         WebLog.printf("[ERROR] MCP23018 (0x%02X) register select failed: %s (%d)\n",
                        i2cAddress, getI2CErrorStr(writeErr), writeErr);
         return false;
@@ -101,6 +102,7 @@ bool MCP23018::read(uint16_t& data) {
         return true;
     }
 
+    needsRead = true;
     WebLog.printf("[ERROR] MCP23018 (0x%02X) read failed: expected 2 bytes, got %d\n",
                    i2cAddress, bytesReceived);
     return false;

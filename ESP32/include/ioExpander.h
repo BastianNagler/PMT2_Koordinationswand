@@ -8,8 +8,8 @@
 #include "config.h"
 
 /**
- * Attempts to clear an unresponsive or locked I2C bus by clocking SCL line
- * 9 cycles and pulsing a clean STOP condition.
+ * Releases the hardware I2C peripheral (`Wire.end()`) and clears an unresponsive
+ * or locked I2C bus by clocking SCL 9 cycles followed by a clean STOP condition.
  *
  * @param[in] sdaPin GPIO pin number of the I2C SDA line.
  * @param[in] sclPin GPIO pin number of the I2C SCL line.
@@ -22,6 +22,7 @@ void recoverI2CBus(const uint8_t sdaPin, const uint8_t sclPin);
 class IO_Expander {
 private:
     const uint8_t num_io_exp;
+    uint8_t pollTicks = 0;
     std::array<MCP23018, NUM_IO_EXPANDER> io_exp;
 
 public:
@@ -46,12 +47,13 @@ public:
     bool init();
 
     /**
-     * Reads all pending inputs from expanders that signaled an interrupt into thread-safe SensorState.
+     * Reads inputs from expanders signaled via ISR, active INT pin level, or periodic
+     * fallback poll into the thread-safe `SensorState`.
      *
      * @param[out] sensorState Target thread-safe sensor state container.
      * @param[in] numFields Number of valid fields to populate.
      *
-     * @return `true` if all pending reads succeeded, `false` on bus error.
+     * @return `true` if all triggered reads succeeded, `false` on bus error.
      */
     bool read(SensorState& sensorState, const uint8_t numFields);
 

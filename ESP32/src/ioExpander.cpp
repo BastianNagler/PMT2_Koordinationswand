@@ -1,6 +1,8 @@
 #include "ioExpander.h"
 #include "WebLog.h"
 
+static constexpr uint8_t FALLBACK_POLL_TICKS = 5;
+
 IO_Expander::IO_Expander(const uint8_t num_io_exp, const uint8_t* const addresses, const uint8_t* const irq_pins)
     : num_io_exp(num_io_exp)
 {
@@ -20,8 +22,14 @@ bool IO_Expander::init() {
 }
 
 bool IO_Expander::read(SensorState& sensorState, const uint8_t numFields) {
+    // Periodic 50 ms fallback poll and active-high INT level check recover stuck MCP23018 interrupts
+    const bool forcePoll = (++pollTicks >= FALLBACK_POLL_TICKS);
+    if (forcePoll) {
+        pollTicks = 0;
+    }
+
     for (uint8_t i = 0; i < num_io_exp; i++) {
-        if (io_exp[i].needsRead) {
+        if (io_exp[i].needsRead || forcePoll || digitalRead(io_exp[i].getInterruptPin()) == HIGH) {
             uint16_t state = 0;
             if (!io_exp[i].read(state)) {
                 return false;
@@ -53,6 +61,7 @@ bool IO_Expander::resetAndReinit() {
 }
 
 void recoverI2CBus(const uint8_t sdaPin, const uint8_t sclPin) {
+    Wire.end();
     pinMode(sdaPin, INPUT_PULLUP);
     pinMode(sclPin, OUTPUT);
     digitalWrite(sclPin, HIGH);
