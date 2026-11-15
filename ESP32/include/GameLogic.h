@@ -89,7 +89,7 @@ private:
     uint8_t playerWhoScored = 0;
     uint32_t gameStartTime = 0;
 
-    uint8_t getRandomGenerator(const uint8_t min, const uint8_t max);
+    uint8_t getRandomGenerator(const uint8_t min, const uint8_t max) const;
     void set_next_target(const uint8_t player);
     void handleIdleState(const uint32_t currentTime);
     void handleStartAnimState(const uint32_t currentTime);

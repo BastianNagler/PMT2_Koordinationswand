@@ -30,9 +30,8 @@ struct HighscoreEntry {
  */
 class HighscoreManager {
 private:
-    HighscoreEntry highscores60[NUM_HIGHSCORES];
-    HighscoreEntry highscoresDynamic[NUM_HIGHSCORES];
-    int8_t lastNewHighscoreIndex = -1;
+    std::array<HighscoreEntry, NUM_HIGHSCORES> highscores60{};
+    std::array<HighscoreEntry, NUM_HIGHSCORES> highscoresDynamic{};
     mutable std::recursive_mutex mtx;
 
     /**

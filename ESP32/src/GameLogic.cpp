@@ -17,7 +17,7 @@ void GameLogic::init() {
     pendingDurationMs = 0;
 }
 
-uint8_t GameLogic::getRandomGenerator(const uint8_t min, const uint8_t max) {
+uint8_t GameLogic::getRandomGenerator(const uint8_t min, const uint8_t max) const {
     if (min >= max) {
         return min;
     }
@@ -115,10 +115,9 @@ void GameLogic::handleStartAnimState(const uint32_t currentTime) {
     const uint32_t maxElapsed = NUM_ROWS * intervalMs;
 
     if (elapsed < maxElapsed) {
-        uint32_t rowsToLight = (elapsed / intervalMs) + 1;
-        if (rowsToLight > NUM_ROWS) {
-            rowsToLight = NUM_ROWS;
-        }
+        const uint8_t rowsToLight = (elapsed / intervalMs + 1 > NUM_ROWS)
+                                        ? NUM_ROWS
+                                        : static_cast<uint8_t>(elapsed / intervalMs + 1);
 
         for (uint8_t r = 0; r < rowsToLight; ++r) {
             for (uint8_t c = 0; c < NUM_COLUMNS; ++c) {
@@ -129,10 +128,8 @@ void GameLogic::handleStartAnimState(const uint32_t currentTime) {
         leds.clear();
         gameStartTime = currentTime;
 
-        if (currentMode == SINGLE_PLAYER) {
-            set_next_target(1);
-        } else {
-            set_next_target(1);
+        set_next_target(1);
+        if (currentMode == MULTI_PLAYER) {
             set_next_target(2);
         }
 
@@ -320,10 +317,7 @@ GameSettings GameLogic::getSettings() const {
 
 uint32_t GameLogic::getGameDurationMs() const {
     std::lock_guard<std::mutex> lock(stateMutex);
-    const bool gameIsActive = (gameState == START_ANIM || gameState == PLAYING ||
-                               gameState == RIPPLE_ANIM || gameState == GAME_OVER ||
-                               gameState == COOLDOWN);
-    if (gameIsActive) {
+    if (gameState != IDLE) {
         return activeMatchDurationMs;
     }
     return (pendingDurationMs != 0) ? pendingDurationMs : settings.gameDurationMs;
@@ -346,11 +340,7 @@ void GameLogic::applyNewDuration(const uint32_t newDuration) {
         return;
     }
 
-    const bool gameIsActive = (gameState == START_ANIM || gameState == PLAYING ||
-                               gameState == RIPPLE_ANIM || gameState == GAME_OVER ||
-                               gameState == COOLDOWN);
-
-    if (gameIsActive) {
+    if (gameState != IDLE) {
         pendingDurationMs = newDuration;
         WebLog.printf("[GAME] Match active (%u ms): new duration %u ms queued for next match\n",
                       activeMatchDurationMs, newDuration);

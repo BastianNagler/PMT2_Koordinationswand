@@ -16,7 +16,6 @@
  */
 class HeartbeatLED {
 private:
-    uint32_t color = 0x00FFFF00;
     std::atomic<bool> hasError{false};
 
 public:

@@ -160,10 +160,42 @@ static bool isHeapSafe(AsyncWebServerRequest* const request) {
     return true;
 }
 
+static String buildScoreJson(const uint8_t scoreP1, const uint8_t scoreP2) {
+    JsonDocument doc;
+    doc["action"] = "update counter";
+    doc["scoreP1"] = scoreP1;
+    doc["scoreP2"] = scoreP2;
+    doc["counterValue"] = scoreP1;
+
+    String output;
+    serializeJson(doc, output);
+    return output;
+}
+
+static String buildGameOverJson() {
+    const bool isDefaultTime = (gameInstance.getGameDurationMs() == 60000);
+    JsonDocument doc;
+    doc["action"] = "end of game";
+    doc["finalScoreP1"] = gameInstance.getScoreP1();
+    doc["finalScoreP2"] = gameInstance.getScoreP2();
+    doc["isDefaultTime"] = isDefaultTime;
+
+    const std::array<HighscoreEntry, NUM_HIGHSCORES> highscores = gameInstance.getHighscoresCopy(isDefaultTime);
+    JsonArray hsArray = doc["highscoreList"].to<JsonArray>();
+    for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
+        JsonObject player = hsArray.add<JsonObject>();
+        player["playerName"] = highscores[i].name;
+        player["counterValue"] = highscores[i].score;
+    }
+
+    String output;
+    serializeJson(doc, output);
+    return output;
+}
+
 static void sendStateToClient(AsyncWebSocketClient* const client) {
     const GameState state = gameInstance.getGameState();
     const uint32_t duration = gameInstance.getGameDurationMs();
-    const bool isDefaultTime = (duration == 60000);
 
     if (state == PLAYING || state == START_ANIM || state == RIPPLE_ANIM) {
         JsonDocument docStart;
@@ -180,34 +212,9 @@ static void sendStateToClient(AsyncWebSocketClient* const client) {
         String outputStart;
         serializeJson(docStart, outputStart);
         client->text(outputStart);
-
-        JsonDocument docScore;
-        docScore["action"] = "update counter";
-        docScore["scoreP1"] = gameInstance.getScoreP1();
-        docScore["scoreP2"] = gameInstance.getScoreP2();
-        docScore["counterValue"] = gameInstance.getScoreP1();
-
-        String outputScore;
-        serializeJson(docScore, outputScore);
-        client->text(outputScore);
+        client->text(buildScoreJson(gameInstance.getScoreP1(), gameInstance.getScoreP2()));
     } else {
-        JsonDocument doc;
-        doc["action"] = "end of game";
-        doc["finalScoreP1"] = gameInstance.getScoreP1();
-        doc["finalScoreP2"] = gameInstance.getScoreP2();
-        doc["isDefaultTime"] = isDefaultTime;
-
-        const std::array<HighscoreEntry, NUM_HIGHSCORES> highscores = gameInstance.getHighscoresCopy(isDefaultTime);
-        JsonArray hsArray = doc["highscoreList"].to<JsonArray>();
-        for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-            JsonObject player = hsArray.add<JsonObject>();
-            player["playerName"] = highscores[i].name;
-            player["counterValue"] = highscores[i].score;
-        }
-
-        String output;
-        serializeJson(doc, output);
-        client->text(output);
+        client->text(buildGameOverJson());
     }
 }
 
@@ -356,7 +363,7 @@ void initWebInterface() {
     WiFi.mode(WIFI_AP);
     WiFi.setSleep(false);
 
-    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+    WiFi.onEvent([](const WiFiEvent_t event, const WiFiEventInfo_t info) {
         if (event == ARDUINO_EVENT_WIFI_AP_STACONNECTED) {
             WebLog.printf("[WIFI] Station connected (MAC: %02X:%02X:%02X:%02X:%02X:%02X, AID: %d)\n",
                           info.wifi_ap_staconnected.mac[0], info.wifi_ap_staconnected.mac[1],
@@ -498,7 +505,7 @@ void initWebInterface() {
 }
 
 void cleanupWebInterface() {
-    // 1. Drain pending DNS queries in a quick non-blocking loop
+    // shortcut: drains up to 4 DNS queries per 100 ms tick, move to faster loop if captive portal resolution lags
     for (size_t i = 0; i < 4; ++i) {
         dnsServer.processNextRequest();
     }
@@ -506,13 +513,11 @@ void cleanupWebInterface() {
     const uint32_t now = millis();
     const uint32_t freeHeap = ESP.getFreeHeap();
 
-    // 2. Client health and inactivity audit
     for (AsyncWebSocketClient& client : ws.getClients()) {
         if (client.status() != WS_CONNECTED) {
             continue;
         }
 
-        // Evict congested clients (TCP output queue backlogged)
         if (client.queueLen() > MAX_CLIENT_QUEUE_LEN) {
             WebLog.printf("[WEBSOCKET] Evicting congested client %u (Queue: %u)\n",
                           client.id(), client.queueLen());
@@ -521,7 +526,6 @@ void cleanupWebInterface() {
             continue;
         }
 
-        // Evict silent clients exceeding inactivity threshold
         const uint32_t lastSeen = getClientLastSeen(client.id());
         if (lastSeen > 0 && (now - lastSeen > CLIENT_INACTIVITY_TIMEOUT_MS)) {
             WebLog.printf("[WEBSOCKET] Evicting inactive client %u (Idle %lu ms)\n",
@@ -531,7 +535,6 @@ void cleanupWebInterface() {
             continue;
         }
 
-        // Emergency eviction if system heap is critically low
         if (freeHeap < CRITICAL_HEAP_BYTES) {
             WebLog.printf("[WEBSOCKET] Critical heap (%u bytes)! Evicting client %u\n",
                           freeHeap, client.id());
@@ -541,13 +544,9 @@ void cleanupWebInterface() {
         }
     }
 
-    // 3. Purge disconnected sockets
     ws.cleanupClients(MAX_WS_CLIENTS);
 
-    // 4. Flush pending log entries ONLY to subscribed clients (e.g. logs.html)
-    WebLog.flushPendingLogs([](const uint32_t clientId) -> bool {
-        return isLogSubscriber(clientId);
-    });
+    WebLog.flushPendingLogs(isLogSubscriber);
 }
 
 void notifyGameStart(const char* const mode) {
@@ -562,34 +561,9 @@ void notifyGameStart(const char* const mode) {
 }
 
 void updateScore(const uint8_t scoreP1, const uint8_t scoreP2) {
-    JsonDocument doc;
-    doc["action"] = "update counter";
-    doc["scoreP1"] = scoreP1;
-    doc["scoreP2"] = scoreP2;
-    doc["counterValue"] = scoreP1;
-
-    String output;
-    serializeJson(doc, output);
-    broadcastWs(output);
+    broadcastWs(buildScoreJson(scoreP1, scoreP2));
 }
 
 void notifyGameOver() {
-    const bool isDefaultTime = (gameInstance.getGameDurationMs() == 60000);
-    JsonDocument doc;
-    doc["action"] = "end of game";
-    doc["finalScoreP1"] = gameInstance.getScoreP1();
-    doc["finalScoreP2"] = gameInstance.getScoreP2();
-    doc["isDefaultTime"] = isDefaultTime;
-
-    const std::array<HighscoreEntry, NUM_HIGHSCORES> highscores = gameInstance.getHighscoresCopy(isDefaultTime);
-    JsonArray hsArray = doc["highscoreList"].to<JsonArray>();
-    for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-        JsonObject player = hsArray.add<JsonObject>();
-        player["playerName"] = highscores[i].name;
-        player["counterValue"] = highscores[i].score;
-    }
-
-    String output;
-    serializeJson(doc, output);
-    broadcastWs(output);
+    broadcastWs(buildGameOverJson());
 }

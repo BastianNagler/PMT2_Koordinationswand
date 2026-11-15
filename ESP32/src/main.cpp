@@ -39,7 +39,6 @@ static void heartbeatTask(void* pvParameters);
  * @param[in] arg Optional context argument.
  */
 static void custom_panic_handler(arduino_panic_info_t* const info, void* const arg) {
-    // Force heartbeat LED to bright solid red
     ws2812Write(HEARTBEAT_LED_PIN, 0xFF0000);
 }
 
@@ -65,7 +64,6 @@ void setup() {
 
     BaseType_t ret;
 
-    // Core 1 Task Hierarchy: Input (4) > Game (3) > LED (2) > Heartbeat (1)
     ret = xTaskCreatePinnedToCore(inputTask, "Input Task", 4096, nullptr, 4, nullptr, 1);
     if (ret != pdPASS) {
         WebLog.printf("[ERROR] Failed to create Input Task (err: %d)\n", ret);
@@ -86,7 +84,6 @@ void setup() {
         WebLog.printf("[ERROR] Failed to create Heartbeat Task (err: %d)\n", ret);
     }
 
-    // Core 0 Task: Web Task (1) isolated from real-time Core 1 loops
     ret = xTaskCreatePinnedToCore(webTask, "Web Task", 8192, nullptr, 1, nullptr, 0);
     if (ret != pdPASS) {
         WebLog.printf("[ERROR] Failed to create Web Task (err: %d)\n", ret);

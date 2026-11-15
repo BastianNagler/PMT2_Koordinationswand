@@ -49,13 +49,7 @@ bool IO_Expander::resetAndReinit() {
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ_HZ);
     Wire.setTimeOut(100);
 
-    bool allInitialized = true;
-    for (uint8_t i = 0; i < num_io_exp; i++) {
-        if (!io_exp[i].init()) {
-            allInitialized = false;
-        }
-    }
-    return allInitialized;
+    return init();
 }
 
 void recoverI2CBus(const uint8_t sdaPin, const uint8_t sclPin) {

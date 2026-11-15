@@ -31,10 +31,7 @@ void WebLogClass::commitCurrentLine() {
     currentLineLen = 0;
 }
 
-size_t WebLogClass::write(const uint8_t c) {
-    std::lock_guard<std::mutex> lock(logMutex);
-    Serial.write(c);
-
+void WebLogClass::appendChar(const uint8_t c) {
     if (currentLineLen == 0 && c != '\r' && c != '\n') {
         const uint32_t ms = millis();
         const int written = snprintf(currentLine, sizeof(currentLine),
@@ -55,7 +52,12 @@ size_t WebLogClass::write(const uint8_t c) {
             commitCurrentLine();
         }
     }
+}
 
+size_t WebLogClass::write(const uint8_t c) {
+    std::lock_guard<std::mutex> lock(logMutex);
+    Serial.write(c);
+    appendChar(c);
     return 1;
 }
 
@@ -68,28 +70,7 @@ size_t WebLogClass::write(const uint8_t* const buffer, const size_t size) {
     Serial.write(buffer, size);
 
     for (size_t i = 0; i < size; ++i) {
-        const uint8_t c = buffer[i];
-
-        if (currentLineLen == 0 && c != '\r' && c != '\n') {
-            const uint32_t ms = millis();
-            const int written = snprintf(currentLine, sizeof(currentLine),
-                                         "[%6lu.%03lu] ",
-                                         static_cast<unsigned long>(ms / 1000),
-                                         static_cast<unsigned long>(ms % 1000));
-            if (written > 0 && static_cast<size_t>(written) < sizeof(currentLine)) {
-                currentLineLen = static_cast<size_t>(written);
-            }
-        }
-
-        if (c == '\n') {
-            commitCurrentLine();
-        } else if (c != '\r') {
-            if (currentLineLen + 1 < sizeof(currentLine)) {
-                currentLine[currentLineLen++] = static_cast<char>(c);
-            } else {
-                commitCurrentLine();
-            }
-        }
+        appendChar(buffer[i]);
     }
 
     return size;
@@ -108,6 +89,7 @@ void WebLogClass::flushPendingLogs(const LogSubscriberFilter filter) {
 
         wsTarget = webSocket;
         const size_t pending = totalLogged - lastBroadcastSeq;
+        // shortcut: caps burst at 8 lines per 100 ms tick, increase batch size if high-rate logs fall behind
         sendCount = (pending > 8) ? 8 : pending;
 
         for (size_t i = 0; i < sendCount; ++i) {
@@ -151,7 +133,6 @@ String WebLogClass::getLogsJson() {
     size_t count = 0;
 
     {
-        // Minimal lock duration: copy entries into local buffer and release lock immediately
         std::lock_guard<std::mutex> lock(logMutex);
         count = ringCount;
         const size_t startIdx = (ringCount < MAX_LOG_LINES) ? 0 : ringHead;
@@ -162,7 +143,6 @@ String WebLogClass::getLogsJson() {
         }
     }
 
-    // Allocate ArduinoJson structures and serialize completely outside logMutex
     JsonDocument doc;
     doc["action"] = "log_history";
     JsonArray arr = doc["logs"].to<JsonArray>();

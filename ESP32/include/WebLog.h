@@ -37,6 +37,7 @@ private:
     AsyncWebSocket* webSocket = nullptr;
     mutable std::mutex logMutex;
 
+    void appendChar(const uint8_t c);
     void commitCurrentLine();
 
 public:

@@ -11,24 +11,18 @@ void HighscoreManager::load() {
     if (LittleFS.exists(HIGHSCORE_FILE_PATH)) {
         File file = LittleFS.open(HIGHSCORE_FILE_PATH, "r");
         if (file) {
-            const size_t bytesRead = file.read(reinterpret_cast<uint8_t*>(highscores60), sizeof(highscores60));
+            const size_t bytesRead = file.read(reinterpret_cast<uint8_t*>(highscores60.data()), sizeof(highscores60));
             file.close();
             if (bytesRead == sizeof(highscores60)) {
                 WebLog.println("[HIGHSCORE] Loaded highscores from LittleFS");
             } else {
                 WebLog.println("[HIGHSCORE] File corrupt, re-initializing defaults");
-                for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-                    highscores60[i].score = 0;
-                    strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
-                }
+                highscores60.fill({});
             }
         }
     } else {
         WebLog.println("[HIGHSCORE] No persistent file found, initializing defaults");
-        for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-            highscores60[i].score = 0;
-            strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
-        }
+        highscores60.fill({});
     }
 
     clearDynamicHighscores();
@@ -36,27 +30,22 @@ void HighscoreManager::load() {
 
 void HighscoreManager::clearDynamicHighscores() {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-        highscoresDynamic[i].score = 0;
-        strlcpy(highscoresDynamic[i].name, "---", MAX_NAME_LEN);
-    }
+    highscoresDynamic.fill({});
 }
 
 void HighscoreManager::reset60sHighscore() {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-        highscores60[i].score = 0;
-        strlcpy(highscores60[i].name, "---", MAX_NAME_LEN);
-    }
+    highscores60.fill({});
     save60();
     WebLog.println("[HIGHSCORE] Successfully reset 60s highscores");
 }
 
 void HighscoreManager::save60() {
     std::lock_guard<std::recursive_mutex> lock(mtx);
+    // shortcut: synchronous LittleFS write in caller task, offload via dirty flag to webTask if flash writes stall gameTask
     File file = LittleFS.open(HIGHSCORE_FILE_PATH, "w");
     if (file) {
-        file.write(reinterpret_cast<const uint8_t*>(highscores60), sizeof(highscores60));
+        file.write(reinterpret_cast<const uint8_t*>(highscores60.data()), sizeof(highscores60));
         file.close();
     } else {
         WebLog.println("[ERROR] Failed to write highscores to LittleFS");
@@ -65,8 +54,7 @@ void HighscoreManager::save60() {
 
 void HighscoreManager::checkAndAdd(const uint8_t newScore, const bool isDefaultTime) {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    lastNewHighscoreIndex = -1;
-    HighscoreEntry* const targetList = isDefaultTime ? highscores60 : highscoresDynamic;
+    auto& targetList = isDefaultTime ? highscores60 : highscoresDynamic;
 
     if (newScore <= targetList[NUM_HIGHSCORES - 1].score) {
         return;
@@ -86,7 +74,6 @@ void HighscoreManager::checkAndAdd(const uint8_t newScore, const bool isDefaultT
 
     targetList[insertPos].score = newScore;
     strlcpy(targetList[insertPos].name, HIGHSCORE_PLACEHOLDER_NAME, MAX_NAME_LEN);
-    lastNewHighscoreIndex = static_cast<int8_t>(insertPos);
 
     if (isDefaultTime) {
         save60();
@@ -106,7 +93,7 @@ void HighscoreManager::updateHighscoreName(const int index, const char* const ne
         return;
     }
 
-    HighscoreEntry* const targetList = isDefaultTime ? highscores60 : highscoresDynamic;
+    auto& targetList = isDefaultTime ? highscores60 : highscoresDynamic;
     strlcpy(targetList[index].name, newName, MAX_NAME_LEN);
 
     if (isDefaultTime) {
@@ -117,11 +104,5 @@ void HighscoreManager::updateHighscoreName(const int index, const char* const ne
 
 std::array<HighscoreEntry, NUM_HIGHSCORES> HighscoreManager::getHighscoresCopy(const bool isDefaultTime) const {
     std::lock_guard<std::recursive_mutex> lock(mtx);
-    std::array<HighscoreEntry, NUM_HIGHSCORES> copy{};
-    const HighscoreEntry* const source = isDefaultTime ? highscores60 : highscoresDynamic;
-
-    for (size_t i = 0; i < NUM_HIGHSCORES; ++i) {
-        copy[i] = source[i];
-    }
-    return copy;
+    return isDefaultTime ? highscores60 : highscoresDynamic;
 }
